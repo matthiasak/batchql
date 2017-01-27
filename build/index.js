@@ -4,6 +4,7 @@ ___scope___.file("index.js", function(exports, require, module, __filename, __di
 
 "use strict";
 const clan_fp_1 = require("clan-fp");
+const debounce = require('lodash.debounce');
 const parse = (_q, i) => {
     const [query, fragments] = removeFragments(_q), name = /^\s*(query|mutation)\s*(\w+)\s*(\([^)]+\))?\s*/ig, ws = /\s+/ig, comment = /(#|\/\/)(.*)$/igm, q = query.replace(comment, '').replace(name, '').replace(ws, ' ').trim(), sig = name.exec(query.trim()), unwrapped = q.slice(1, q.lastIndexOf('}')).trim();
     if (sig && sig[1] === 'mutation')
