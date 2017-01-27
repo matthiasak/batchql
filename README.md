@@ -1,5 +1,7 @@
 # BatchQL
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/matthiasak/batchql.svg)](https://greenkeeper.io/)
+
 [![NPM](https://nodei.co/npm/batchql.png)](https://nodei.co/npm/batchql/)
 [![Build Status](https://travis-ci.org/matthiasak/batchql.svg?branch=master)](https://travis-ci.org/matthiasak/batchql)
 
