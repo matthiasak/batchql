@@ -182,6 +182,62 @@ batchedGet(`{ notifications { comments } }`).then(response => console.log(respon
 batchedGet(`{ messages { text, from } }`).then(response => console.log(response.data.messages))
 ```
 
+The end result of using batchql:
+
+```
+
+
+   with batchql:
+
+
+
+  +----------------------------+
+  |                            |
+  |    header                  |  header +> `{ user { ...menuItems }}`+
+  |                            |                                      |
+  |                            |                                      |
+  |                            |                                      |
+  +----------------------------+                                      |
+  |                            |                                      |
+  |  +-------------------------+                                      |
+  |  |     ||     ||     ||   ||                                      +
+  |  |  a  ||  b  ||  c  ||   ||  a, b, c, d, e +> `{ content(id:???) { title, date, summary } }
+  |  |     ||     ||     ||   ||  +-------------------------------+   +
+  |  +--------------------|   ||                      |  |  |  |  |   |
+  |  +--------------------| e ||                      |  |  |  |  |   |
+  |  |                   ||   ||                      |  |  |  |  |   |
+  |  |                   ||   ||                      |  |  |  |  |   |
+  |  |        d          ||   ||                      |  |  |  |  |   |
+  |  |                   ||   ||                      |  |  |  |  |   |
+  |  |                   ||   ||                      |  |  |  |  |   |
+  |  +-------------------------|                      |  |  |  |  |   |
+  +----------------------------+               +------v--v--v--v--v---v------------+
+                                               |                                   |
+                                               |         batched querying          |
+                                               |                                   |
+                                               |                                   |
+                                               +-----------------------------------+
+                                                                |
+                                                                |
+                                                                |
+                                                            XXXX|XX  XXXXX
+                                                  XXXXXXXXXXX   v         XXX
+                                                 X                          X
+                                           XXXX XX                          XXXXXX X
+                                        XXX                                        X
+                                        X                                          XX
+                                        X             graphql endpoint              X
+                                        X                                            X
+                                        X                                            XX
+                                          XXXXXXXXXXXXXXXXXX                          X
+                                                           XX                        XX
+                                                            XX         XXXXXXX      XX
+                                                              XXXXXXXXX      XXXX XXX
+                                                                                XXX
+
+
+```
+
 ## Usage
 
 ```sh
