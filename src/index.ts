@@ -1,5 +1,5 @@
 import {obs} from 'clan-fp'
-import debounce from 'lodash.debounce'
+const debounce = require('lodash.debounce')
 
 const parse = (_q, i) => {
     const [query, fragments] = removeFragments(_q)
