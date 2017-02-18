@@ -1,6 +1,6 @@
 "use strict";
 var clan_fp_1 = require("clan-fp");
-var debounce = require('lodash.debounce');
+var lodash_debounce_1 = require("lodash.debounce");
 var parse = function (_q, i) {
     var _a = removeFragments(_q), query = _a[0], fragments = _a[1], name = /^\s*(query|mutation)\s*(\w+)\s*(\([^)]+\))?\s*/ig, ws = /\s+/ig, comment = /(#|\/\/)(.*)$/igm, q = query.replace(comment, '').replace(name, '').replace(ws, ' ').trim(), sig = name.exec(query.trim()), unwrapped = q.slice(1, q.lastIndexOf('}')).trim();
     if (sig && sig[1] === 'mutation')
@@ -124,7 +124,7 @@ exports.mux = function (getter, wait, max_buffer) {
         if (t && t[0] === '{')
             return q.slice(q.indexOf('{') + 1, q.lastIndexOf('}'));
         return q;
-    }, send = debounce(function ($) {
+    }, send = lodash_debounce_1["default"](function ($) {
         var q = payload(), c = cbs();
         callbacks(false); // reset callbacks
         queries(false); // reset query data
