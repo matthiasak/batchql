@@ -3,15 +3,14 @@
   "version": "0.0.4",
   "description": "Don't just graphql, batchql.",
   "scripts": {
-    "prestart": "rimraf .fusebox build",
-    "start": "node fuse",
-    "prebuild": "rimraf .fusebox build",
-    "build": "cross-env NODE_ENV=production node fuse",
-    "push": "git add . && git commit -am \"comitting and pushing new patch version\" && git push origin --all",
-    "deploy": "npm-run-all build push n",
-    "deploy-r": "npm-run-all build push n release",
-    "n": "npm version patch && npm publish",
-    "release": "release"
+    "prestart": "rimraf build/*",
+    "start": "tsc -w src/index.ts --outDir build -d",
+    "prebuild": "rimraf build",
+    "build": "cross-env NODE_ENV=production tsc src/index.ts --outDir build -d; echo 'done.';",
+    "commit": "git add . && git commit -am \"comitting and pushing new patch version\"",
+    "push": "git push origin --all",
+    "deploy": "npm-run-all build commit n push",
+    "n": "npm version patch && npm publish"
   },
   "repository": {
     "type": "git",
@@ -23,23 +22,15 @@
     "multiplex"
   ],
   "main": "build/index.js",
-  "module": "src/index.js",
   "author": "Matt Keas (@matthiasak)",
   "license": "MIT",
   "dependencies": {
     "clan-fp": "^0.0.44"
   },
   "devDependencies": {
-    "chokidar": "^1.6.1",
     "cross-env": "^3.1.3",
-    "fuse-box": "^1.3.75",
-    "fusebox-closure-plugin": "^0.0.6",
-    "ghooks": "^2.0.0",
-    "husky": "^0.12.0",
     "lodash.debounce": "^4.0.8",
-    "now": "^1.0.0",
     "npm-run-all": "^4.0.0",
-    "release": "^1.0.6",
     "rimraf": "^2.5.4",
     "typescript": "^2.1.4"
   }
