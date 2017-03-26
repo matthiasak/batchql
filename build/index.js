@@ -1,10 +1,13 @@
 "use strict";
 var clan_fp_1 = require("clan-fp");
 var debounce = require('lodash.debounce');
+var mutationWarningShown = false;
 var parse = function (_q, i) {
     var _a = removeFragments(_q), query = _a[0], fragments = _a[1], name = /^\s*(query|mutation)\s*(\w+)\s*(\([^)]+\))?\s*/ig, ws = /\s+/ig, comment = /(#|\/\/)(.*)$/igm, q = query.replace(comment, '').replace(name, '').replace(ws, ' ').trim(), sig = name.exec(query.trim()), unwrapped = q.slice(1, q.lastIndexOf('}')).trim();
-    if (sig && sig[1] === 'mutation')
-        throw 'Mutations cannot be batched, and must be submitted as a regular GraphQL request';
+    if (sig && sig[1] === 'mutation' && !mutationWarningShown) {
+        mutationWarningShown = true;
+        console.warn instanceof Function && console.warn('Take caution when batching mutations. It is recommended they are submitted as a regular GraphQL request.');
+    }
     if (sig) {
         var s = sig[0], type = sig[1], name_1 = sig[2], args = sig[3];
         return {

@@ -1,6 +1,8 @@
 import {obs} from 'clan-fp'
 const debounce = require('lodash.debounce')
 
+let mutationWarningShown = false
+
 const parse = (_q, i) => {
     const [query, fragments] = removeFragments(_q)
     	, name = /^\s*(query|mutation)\s*(\w+)\s*(\([^)]+\))?\s*/ig
@@ -10,8 +12,10 @@ const parse = (_q, i) => {
     	, sig = name.exec(query.trim())
     	, unwrapped = q.slice(1, q.lastIndexOf('}')).trim()
 
-    if(sig && sig[1] === 'mutation')
-        throw 'Mutations cannot be batched, and must be submitted as a regular GraphQL request'
+    if(sig && sig[1] === 'mutation' && !mutationWarningShown){
+    	mutationWarningShown = true
+        console.warn instanceof Function && console.warn('Take caution when batching mutations. It is recommended they are submitted as a regular GraphQL request.')
+    }
 
     if(sig){
     	let [s, type, name, args] = sig

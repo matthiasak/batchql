@@ -25,7 +25,7 @@
   "author": "Matt Keas (@matthiasak)",
   "license": "MIT",
   "dependencies": {
-    "clan-fp": "^0.0.50"
+    "clan-fp": "^0.0.58"
   },
   "devDependencies": {
     "cross-env": "^3.1.3",
