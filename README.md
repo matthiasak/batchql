@@ -5,6 +5,10 @@
 
 ![](./BatchQL.png)
 
+> Parser combinators propose a middle ground between hand-written parsers and generated parsers. They are made of small functions that handle basic parts of a format, like recognizing a word in ASCII characters or a null byte. Those functions are then composed in more useful building blocks like the pair combinator that applies two parsers in sequence, or the choice combinator that tries different parsers until one of them succeeds.
+
+> The functions are completely deterministic and hold no mutable state. The deterministic behaviour of parser combinators simplifies writing the state machine that manages data accumulation.
+
 GraphQL is awesome. It lets you query any client-side data and make mutations with a "type-safe" API. It talks to a single endpoint and allows you to query whatever data you need. You can achieve neat little queries like:
 
 ```js
