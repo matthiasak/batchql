@@ -1,6 +1,6 @@
 {
   "name": "batchql",
-  "version": "0.0.9",
+  "version": "1.0.0",
   "description": "Don't just graphql, batchql.",
   "scripts": {
     "prestart": "rimraf build/*",
