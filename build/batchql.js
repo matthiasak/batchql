@@ -1,12 +1,4 @@
 "use strict";
-var __assign = (this && this.__assign) || Object.assign || function(t) {
-    for (var s, i = 1, n = arguments.length; i < n; i++) {
-        s = arguments[i];
-        for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-            t[p] = s[p];
-    }
-    return t;
-};
 exports.__esModule = true;
 var clan_fp_1 = require("clan-fp");
 var debounce = require('lodash.debounce');
@@ -21,10 +13,10 @@ exports.batch = function () {
     var asts = programs.map(combinators_1["default"]), combined = merge_1["default"].apply(void 0, asts);
     return regenerate_1["default"](combined);
 };
-exports.f = function (url, query, args) {
+exports.fetcher = function (url) { return function (query, args) {
     return fetch(url, { method: 'POST', body: JSON.stringify({ query: query, variables: args }) })
         .then(function (r) { return r.json(); });
-};
+}; };
 var appendOrClear = function (acc, x) {
     if (x === false)
         return [];
@@ -43,7 +35,7 @@ exports.mux = function (getter, wait) {
         // clear
         $queries(false);
         $callbacks(false);
-        var batchedQuery = exports.batch.apply(void 0, $q), batchedArgs = $a.reduce(function (acc, x) { return (__assign({}, acc, x)); }, {});
+        var batchedQuery = exports.batch.apply(void 0, $q), batchedArgs = $a.reduce(function (acc, x) { return Object.assign(acc, x); }, {});
         getter(batchedQuery, batchedArgs)
             .then(function (data) {
             return $callbacks.map(function (fn) { return fn(data); });
@@ -57,3 +49,4 @@ exports.mux = function (getter, wait) {
         return new Promise(function (res) { return queue(function (d) { return res(d); }); });
     };
 };
+exports["default"] = exports.mux;
