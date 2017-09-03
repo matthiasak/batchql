@@ -91,12 +91,25 @@ fragment blah on Person { test }
 // jsonlog(ast)
 
 import { should } from "fuse-test-runner";
-import { batch, f, mux } from "./batchql"
+import { batch, fetcher, mux } from "./batchql"
 import parseProgram from "./combinators"
 // import regenerate from "./regenerate"
 
 export class Test {
     "shouldParsePrograms()"() {
         should(batch(q4, q41)).beOkay() //q42
+	}
+
+	"shouldBatchAndResolve()"() {
+		const mock = (query, args) => new Promise((res, rej) => {
+			console.log("new query:", query, args)
+			res({})
+		})
+
+		const f = mux(mock, 1000)
+
+		should(f(q4, q41))
+			.bePromise()
+			.beOkay()
 	}
 }

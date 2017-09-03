@@ -12,7 +12,7 @@ export const batch = (...programs) => {
     return regenerate(combined)
 }
 
-export const f = (url, query, args) =>
+export const fetcher = (url) => (query, args) =>
     fetch(url, { method: 'POST', body: JSON.stringify({ query, variables: args }) })
     .then(r => r.json())
     
@@ -50,7 +50,7 @@ export const mux = (getter, wait=100) => {
                 $callbacks(false)
 
                 let batchedQuery = batch(...$q),
-                    batchedArgs = $a.reduce((acc,x) => ({...acc, ...x}), {})
+                    batchedArgs = $a.reduce((acc,x) => Object.assign(acc, x), {})
 
 				getter(batchedQuery, batchedArgs)
                 .then(data => 
@@ -68,3 +68,5 @@ export const mux = (getter, wait=100) => {
         return new Promise(res => queue(d => res(d)))
 	}
 }
+
+export default mux

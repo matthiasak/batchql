@@ -6,7 +6,7 @@
     "prestart": "rimraf build/*",
     "start": "tsc -w src/batchql.ts --outDir build -d",
     "prebuild": "rimraf build/*",
-    "build": "NODE_ENV=production tsc src/index.ts --outDir build -d",
+    "build": "NODE_ENV=production tsc src/batchql.ts --outDir build -d; echo \"done\";",
     "test": "node fuse.js test"
   },
   "repository": {
@@ -18,17 +18,16 @@
     "mux",
     "multiplex"
   ],
-  "main": "build/index.js",
+  "main": "build/batchql.js",
   "author": "Matt Keas (@matthiasak)",
   "license": "MIT",
   "dependencies": {
     "clan-fp": "^1.0.2",
-    "fuse-box": "^2.2.2",
-    "fuse-test-runner": "^1.0.13",
     "lodash.debounce": "^4.0.8"
   },
   "devDependencies": {
-    "rimraf": "^2.6.1",
-    "typescript": "^2.4.2"
+    "fuse-box": "^2.2.2",
+    "fuse-test-runner": "^1.0.13",
+    "rimraf": "^2.6.1"
   }
 }
