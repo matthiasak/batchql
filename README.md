@@ -5,40 +5,86 @@
 
 ![](./BatchQL.png)
 
+BatchQL is a language-level query optimizer for GraphQL. 
+
+**Note:** Not all GraphQL features are perfectly supported, there will be some caveats that come with the usage of a tool like this.
+
+1. Your batched queries will return data that you asked for, but may have additional attributes on the tree of data returned. You should not depend on this extra data always existing. Future iterations will produce a nested reverse-mapping feature that will only return the data from a particular query.
+2. Language level parsing and query optimizations have not been fully completed for fragment expansions and directives.
+3. Query arguments from parallel queries can be shared since queries are batched.
+
+## Installation
+
+```sh
+npm install --save batchql
+# or
+yarn add batchql
+```
+
+```js
+import {batch, mux, fetcher} from 'batchql'
+// or just 
+// import mux from 'batchql' (mux is default export)
+
+const mergedQueries = batch('query { allPersons { name } }', 'query { allPersons { email } }', 'query { allPersons { age } }')
+mergedQueries // 'query { allPersons { name email age } }'
+
+const makeQuery = mux(fetcher)
+
+makeQuery('query { allPersons { name } }')
+  .then(({data}) => {
+    data // { allpersons: [{name: 'Test', email: 'test@test.com', age: 38}, ...] }
+  })
+makeQuery('query { allPersons { email } }')
+  .then(({data}) => {
+    data // { allpersons: [{name: 'Test', email: 'test@test.com', age: 38}, ...] }
+  })
+makeQuery('query { allPersons { age } }')
+  .then(({data}) => {
+    data // { allpersons: [{name: 'Test', email: 'test@test.com', age: 38}, ...] }
+  })
+```
+
+## This is Dark Magic...
+
+Not really :-) For a given time-slice, one part of BatchQL's algorithm (the `mux()`) can take all calls for a given X ms and then send all of those query strings to the `batch()` method.
+
+The old method (BatchQL pre-1.0) used to take a best guess on batching the queries together by finding a general query statement and matching on parens or curly braces, but if the input query had invalid syntax then the algorithm kinda just blew up. 
+
+It used to kinda do something like this:
+
+```js
+const mergedQueries = batch('query { allPersons { name } }', 'query { allPersons { email } }', 'query { allPersons { age } }')
+mergedQueries
+// query { 
+//  item0: allPersons { name } 
+//  item1: allPersons { email } 
+//  item2: allPersons { age } 
+// }
+```
+
+This merely batched the queries together, but didn't do an actual logical merge of the queries. But no more! Now we have an actual tree-merging batching mechanisms that doesn't batch _messages together_, it batches the _logical queries_. Yey!
+
+How?
+
+Parsers, combinators, and parser-combinators.
+
 > Parser combinators propose a middle ground between hand-written parsers and generated parsers. They are made of small functions that handle basic parts of a format, like recognizing a word in ASCII characters or a null byte. Those functions are then composed in more useful building blocks like the pair combinator that applies two parsers in sequence, or the choice combinator that tries different parsers until one of them succeeds.
 
 > The functions are completely deterministic and hold no mutable state. The deterministic behaviour of parser combinators simplifies writing the state machine that manages data accumulation.
 
-GraphQL is awesome. It lets you query any client-side data and make mutations with a "type-safe" API. It talks to a single endpoint and allows you to query whatever data you need. You can achieve neat little queries like:
+We can actually parse GraphQL query strings into a lightweight Abstract Syntax Tree (AST), and then with multiple ASTs merge them into a single tree with some quick recursive logic. 
 
-```js
-gql(`
-{
-  user {
-  	person(filter: {
-      verified: false
-    }){
-      id
-      name
-      createdAt
-    }
-    adminOf(filter: {
-      verified: false
-    }){
-      id
-      name
-      createdAt
-    }
-  }
-}
-`).then(({data:{data}) => {
-	console.log(data) // {user: {person, adminOf}}...
-	// or use with a React or other Virtual DOM `componentDidMount()` lifecycle method
-	this.setState(data)
-})
-```
+You can check out each piece in the various files under the `/src` folder.
+- `/src/parsers.ts` - code for parsing tokens
+- `/src/combinators.ts` - code for the parser combinators that contain the logic to parse entire GraphQL queries
+- `/src/merge.ts` - code for merging multiple ASTs into a single AST
+- `/src/regenerate.ts` - code for generating a GraphQL string from an AST
+- `/src/batchql.ts` - code for the muxer, a general fetcher, and the batch method
 
-If you choose to create "Service Oriented Components", meaning your components can request their own data, such as with React Resolver, Mithril Resolver, or your own tiny built-in implementation, you run into sometimes 5 or 10 parallel graphql requests heading to your server:
+## Strengths of this approach
+
+If you choose to create "Service Oriented Components", meaning your components can request their own data (such as `onMount`), you run into sometimes 5 or 10 parallel graphql requests heading to your server:
 
 ```
 
@@ -66,103 +112,14 @@ If you choose to create "Service Oriented Components", meaning your components c
 
 ```
 
-With the 6 queries above it could take a lot longer to get the data you need to render to the screen quickly. Fortunately these days we can abstract plain ol' function calls to some sort of shared state.
-
-**This is what BatchQL does**.
-
-Amongst your many components, they generate and request their own query structure from your GraphQL endpoints:
-
-Query 1:
-
-```gql
-{
-	user {
-		orders {
-			...orderData
-		}
-	}
-}
-
-fragment orderData on Order {
-  createdAt
-  billingAddress {
-    ...addressData
-  }
-  shippingAddress {
-    ...addressData
-  }
-  shippinghandling {
-    description
-    cost
-  }
-  # and so forth
-}
-```
-
-Query 2:
-
-```gql
-{
-  user {
-    adminOf {
-      name
-      tags
-      primaryColor
-      secondaryColor
-    }
-    name
-    email
-    invitations {
-      type
-    }
-    systemAdmin
-    notifications {
-      createdAt
-      text
-      title
-      from
-    }
-    createdAt
-    updatedAt
-  }
-}
-```
-
-Combined query sent to server:
-
-```
-fragment orderData on Order {
-  createdAt
-  billingAddress {
-    ...addressData
-  }
-  shippingAddress {
-    ...addressData
-  }
-  shippinghandling {
-    description
-    cost
-  }
-  # and so forth
-}
-
-query batchedQuery  {
-
-	user0: user { orders { ...orderData } }
-
-	user1: user { adminOf { name tags primaryColor secondaryColor } name email invitations { type } systemAdmin notifications { createdAt text title from } createdAt updatedAt }
-
-	# and so forth :)
-
-}
-```
+With the 6 queries above it could take a lot longer to get the data you need to render to the screen quickly. 
 
 BatchQL treats your queries like they are meant to be: logically independent (as much as I could do in a few days' time :D). So, using BatchQL is pretty straightforward and hopefully not too leaky of an abstraction:
 
 ```js
 // step 1. import batchql
-// batchql :: (string -> object -> Promise) -> (string -> object -> Promise)
-import batchql from 'batchql'
+// mux :: (string -> object -> Promise) -> (string -> object -> Promise)
+import mux from 'batchql'
 
 // step 2. create your function the posts to your graphql endpoint
 const get = (url, query, args) =>
@@ -222,7 +179,7 @@ The end result of using batchql:
                                                |                                   |
                                                +-----------------------------------+
                                                                 |
-                                                                |
+                                                         SINGLE QUERY!! :D
                                                                 |
                                                             XXXX|XX  XXXXX
                                                   XXXXXXXXXXX   v         XXX
@@ -239,15 +196,6 @@ The end result of using batchql:
                                                               XXXXXXXXX      XXXX XXX
                                                                                 XXX
 
-
-```
-
-## Usage
-
-```sh
-yarn add batchql
-# or
-npm install --save batchql
 ```
 
 ## Caught a bug?
@@ -257,13 +205,6 @@ npm install --save batchql
 3. Bundle the source code and watch for changes: `npm start`
 
 After that, you'll find the code in the `./build` folder!
-
-## Notes
-
-- I couldn't get the `graphql-tag` parser/AST to work for me this go around, so this is a limited subset of batching features using RegEx and good ol' pure JS. In the future I can do a lot more eloquent tree combinations with an AST once I get that working. For now, the code will not scope and map the names of graphql query arguments to the single batched query, so if possible I recommend sending args as embedded inputs to the query strings instead of as a separate object.
-- Selection names are multiplexed, mapped, and then demux'ed upon return, so the data a query requested is scoped to it's `Promise.resolve()`.
-- Fragments will be extracted from all queries and placed at the top of the batched query.
-- Mutations need to be handled regularly, and I haven't built an auto-scheduler into the library yet but I have plans to support mutations through the batched method soon. For now, just use a regular `POST /graphql` with `fetch()` or `axios` or w/e you prefer for mutations.
 
 ## Authors
 
