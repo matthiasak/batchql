@@ -1,9 +1,6 @@
 # BatchQL
 
 [![NPM](https://nodei.co/npm/batchql.png)](https://nodei.co/npm/batchql/)
-[![Build Status](https://travis-ci.org/matthiasak/batchql.svg?branch=master)](https://travis-ci.org/matthiasak/batchql)
-
-![](./BatchQL.png)
 
 BatchQL is a language-level query optimizer for GraphQL. 
 
