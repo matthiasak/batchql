@@ -280,9 +280,9 @@ chokidar@^1.6.1:
   optionalDependencies:
     fsevents "^1.0.0"
 
-clan-fp@^1.0.2:
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/clan-fp/-/clan-fp-1.0.2.tgz#3e62ea8a85a30a004b599435f826d5f4ccbc255f"
+clan-fp@^1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/clan-fp/-/clan-fp-1.1.0.tgz#26c90a8177194dc9f647181a30702077a9d4e1fc"
   dependencies:
     etag "^1.8.0"
 
@@ -1689,10 +1689,6 @@ type-is@~1.6.15:
   dependencies:
     media-typer "0.3.0"
     mime-types "~2.1.15"
-
-typescript@^2.4.2:
-  version "2.4.2"
-  resolved "https://registry.yarnpkg.com/typescript/-/typescript-2.4.2.tgz#f8395f85d459276067c988aa41837a8f82870844"
 
 uid-number@^0.0.6:
   version "0.0.6"
