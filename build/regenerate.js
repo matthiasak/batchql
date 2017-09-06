@@ -59,9 +59,10 @@ var generateSelectionSet = function (set) {
             var value = _a.value, filterArgs = _a.filterArgs, fields = _a.fields, alias = _a.alias, items = _a.items;
             return (alias ? alias + " : " : '') +
                 value +
-                items ?
-                generateFields(items) :
-                (generateFilterArgs(filterArgs) + generateFields(fields instanceof Array ? fields : fields.items));
+                (items ?
+                    generateFields(items) :
+                    (generateFilterArgs(filterArgs) +
+                        generateFields(fields instanceof Array ? fields : fields.items)));
         })
             .join(' ') +
         '}';
@@ -71,8 +72,8 @@ var generateQuery = function (_a) {
     return type + " " + (name || '') + " " + generateOpArgList(opArgList) + " " + generateSelectionSet(children);
 };
 var generateFragment = function (_a) {
-    var name = _a.name, target = _a.target, children = _a.children;
-    return "fragment " + name + " on " + target + " " + generateSelectionSet([children]);
+    var name = _a.name, target = _a.target, child = _a.children;
+    return "fragment " + name + " on " + target + " " + generateFields(child.items);
 };
 var regenerate = function (ast) {
     return ast.reduce(function (acc, q) {
