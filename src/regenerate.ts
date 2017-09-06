@@ -57,17 +57,24 @@ const generateSelectionSet = set => {
         .map(({value, filterArgs, fields, alias, items}) => {
         	return (alias ? `${alias} : ` : '') + 
                 value + 
-                items ? 
-                	generateFields(items) :
-                	(generateFilterArgs(filterArgs) + generateFields(fields instanceof Array ? fields : fields.items))
+                (
+                    items ? 
+                	    generateFields(items) :
+                	    (
+                            generateFilterArgs(filterArgs) + 
+                            generateFields(fields instanceof Array ? fields : fields.items)
+                        )
+                )
     	})
     	.join(' ') +
     '}'
 }
 
-const generateQuery = ({type, name, opArgList, children}) => `${type} ${name || ''} ${generateOpArgList(opArgList)} ${generateSelectionSet(children)}`
+const generateQuery = ({type, name, opArgList, children}) => 
+    `${type} ${name || ''} ${generateOpArgList(opArgList)} ${generateSelectionSet(children)}`
 
-const generateFragment = ({name, target, children}) => `fragment ${name} on ${target} ${generateSelectionSet([children])}`
+const generateFragment = ({name, target, children:child}) =>
+    `fragment ${name} on ${target} ${generateFields(child.items)}`
 
 const regenerate = ast => 
 	ast.reduce((acc,q) => {

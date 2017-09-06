@@ -63,7 +63,7 @@ ansi-escapes@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/ansi-escapes/-/ansi-escapes-2.0.0.tgz#5bae52be424878dd9783e8910e3fc2922e83c81b"
 
-ansi-regex@^2.0.0:
+ansi-regex@^2.0.0, ansi-regex@^2.1.1:
   version "2.1.1"
   resolved "https://registry.yarnpkg.com/ansi-regex/-/ansi-regex-2.1.1.tgz#c3b33ab5ee360d86e0e628f0468ae7ef27d654df"
 
@@ -314,6 +314,10 @@ color-name@^1.1.1:
   version "1.1.3"
   resolved "https://registry.yarnpkg.com/color-name/-/color-name-1.1.3.tgz#a7d0558bd89c42f795dd42328f740831ca53bc25"
 
+colors@^1.1.2:
+  version "1.1.2"
+  resolved "https://registry.yarnpkg.com/colors/-/colors-1.1.2.tgz#168a4701756b6a7f51a12ce0c97bfa28c084ed63"
+
 combined-stream@^1.0.5, combined-stream@~1.0.5:
   version "1.0.5"
   resolved "https://registry.yarnpkg.com/combined-stream/-/combined-stream-1.0.5.tgz#938370a57b4a51dea2c77c15d5c5fdf895164009"
@@ -399,6 +403,10 @@ depd@1.1.1, depd@~1.1.1:
 destroy@~1.0.4:
   version "1.0.4"
   resolved "https://registry.yarnpkg.com/destroy/-/destroy-1.0.4.tgz#978857442c44749e4206613e37946205826abd80"
+
+diff@^3.3.0:
+  version "3.3.1"
+  resolved "https://registry.yarnpkg.com/diff/-/diff-3.3.1.tgz#aa8567a6eed03c531fc89d3f711cd0e5259dec75"
 
 ecc-jsbn@~0.1.1:
   version "0.1.1"
@@ -648,9 +656,9 @@ fstream@^1.0.0, fstream@^1.0.10, fstream@^1.0.2:
     mkdirp ">=0.5 0"
     rimraf "2"
 
-fuse-box@^2.2.2:
-  version "2.2.2"
-  resolved "https://registry.yarnpkg.com/fuse-box/-/fuse-box-2.2.2.tgz#eec3c4c49496dbfca08d43179a189fbfbce67fda"
+fuse-box@^2.2.31:
+  version "2.2.31"
+  resolved "https://registry.yarnpkg.com/fuse-box/-/fuse-box-2.2.31.tgz#36d267a6c6a79952a9c1fb7d1643c1949a6d42f5"
   dependencies:
     acorn "^5.0.3"
     acorn-es7 "^0.1.0"
@@ -682,11 +690,13 @@ fuse-box@^2.2.2:
     watch "^1.0.1"
     ws "^1.1.1"
 
-fuse-test-runner@^1.0.13:
-  version "1.0.13"
-  resolved "https://registry.yarnpkg.com/fuse-test-runner/-/fuse-test-runner-1.0.13.tgz#c27fc9e973827b2cc406ded83819522c008a95a7"
+fuse-test-runner@^1.0.14:
+  version "1.0.14"
+  resolved "https://registry.yarnpkg.com/fuse-test-runner/-/fuse-test-runner-1.0.14.tgz#9b795ade7174f3220a7e699c4b7a0d6cb72374ba"
   dependencies:
-    pretty-format "^19.0.0"
+    colors "^1.1.2"
+    diff "^3.3.0"
+    pretty-format "^20.0.3"
     realm-utils "^1.0.7"
 
 fuse-tools@^1.0.4:
@@ -1315,10 +1325,11 @@ preserve@^0.2.0:
   version "0.2.0"
   resolved "https://registry.yarnpkg.com/preserve/-/preserve-0.2.0.tgz#815ed1f6ebc65926f865b310c0713bcb3315ce4b"
 
-pretty-format@^19.0.0:
-  version "19.0.0"
-  resolved "https://registry.yarnpkg.com/pretty-format/-/pretty-format-19.0.0.tgz#56530d32acb98a3fa4851c4e2b9d37b420684c84"
+pretty-format@^20.0.3:
+  version "20.0.3"
+  resolved "https://registry.yarnpkg.com/pretty-format/-/pretty-format-20.0.3.tgz#020e350a560a1fe1a98dc3beb6ccffb386de8b14"
   dependencies:
+    ansi-regex "^2.1.1"
     ansi-styles "^3.0.0"
 
 pretty-time@^0.2.0:
@@ -1689,6 +1700,10 @@ type-is@~1.6.15:
   dependencies:
     media-typer "0.3.0"
     mime-types "~2.1.15"
+
+typescript@^2.5.2:
+  version "2.5.2"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-2.5.2.tgz#038a95f7d9bbb420b1bf35ba31d4c5c1dd3ffe34"
 
 uid-number@^0.0.6:
   version "0.0.6"

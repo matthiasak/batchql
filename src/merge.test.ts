@@ -98,18 +98,19 @@ import parseProgram from "./combinators"
 export class Test {
     "shouldParsePrograms()"() {
         should(batch(q4, q41)).beOkay() //q42
+        console.log(batch(q4, q41))
 	}
 
-	"shouldBatchAndResolve()"() {
-		const mock = (query, args) => new Promise((res, rej) => {
-			console.log("new query:", query, args)
-			res({})
-		})
+	// "shouldBatchAndResolve()"() {
+	// 	const mock = (query, args) => new Promise((res, rej) => {
+	// 		console.log("new query:", query, args)
+	// 		res({})
+	// 	})
 
-		const f = mux(mock, 1000)
+	// 	const f = mux(mock)
 
-		should(f(q4, q41))
-			.bePromise()
-			.beOkay()
-	}
+	// 	should(f(q4, q41))
+	// 		.bePromise()
+	// 		.beOkay()
+	// }
 }
