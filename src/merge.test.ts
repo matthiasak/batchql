@@ -99,35 +99,18 @@ export class Test {
     "shouldParsePrograms()"() {
         should(batch(q4, q41)).beOkay() //q42
         console.log(batch(q4, q41))
-
-   //      console.log(
-	  //       batch(
-	  //       `query Person($id: ID!){
-			// 	person(id: $id){
-			// 		name
-	  //               siblings { name }
-	  //           }
-			// }`, 
-	  //       `query Person($id: ID!){
-			// 	person(id: $id){
-	  //               email
-			// 		testField
-			// 		testField2
-	  //           }
-			// }`)
-	  //   )
 	}
 
-	// "shouldBatchAndResolve()"() {
-	// 	const mock = (query, args) => new Promise((res, rej) => {
-	// 		console.log("new query:", query, args)
-	// 		res({})
-	// 	})
+	"shouldBatchAndResolve()"() {
+		const mock = (query, args) => new Promise((res, rej) => {
+			console.log("new query:", query, args)
+			res({})
+		})
 
-	// 	const f = mux(mock)
+		const f = mux(mock)
 
-	// 	should(f(q4, q41))
-	// 		.bePromise()
-	// 		.beOkay()
-	// }
+		should(f(q4, q41))
+			.bePromise()
+			.beOkay()
+	}
 }
