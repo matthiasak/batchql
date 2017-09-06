@@ -53,9 +53,7 @@ export const mux = (getter, wait=100) => {
         let data = payload(),
             $q = data.map(x => x.query),
             $a = data.map(x => x.args),
-            $c = $callbacks()
-
-        console.log('send')
+            $c = responses()
         
         // clear
         $queries(false)
@@ -66,8 +64,7 @@ export const mux = (getter, wait=100) => {
 
         getter(batchedQuery, batchedArgs)
         .then(data => 
-            console.log(data) ||
-            $callbacks.map(fn => fn(data)))
+            $c.map(fn => fn(data)))
     })
 
 	return (query, args) => {

@@ -37,16 +37,14 @@ exports.mux = function (getter, wait) {
     send
         .debounce(wait)
         .then(function () {
-        var data = payload(), $q = data.map(function (x) { return x.query; }), $a = data.map(function (x) { return x.args; }), $c = $callbacks();
-        console.log('send');
+        var data = payload(), $q = data.map(function (x) { return x.query; }), $a = data.map(function (x) { return x.args; }), $c = responses();
         // clear
         $queries(false);
         $callbacks(false);
         var batchedQuery = exports.batch.apply(void 0, $q), batchedArgs = $a.reduce(function (acc, x) { return Object.assign(acc, x); }, {});
         getter(batchedQuery, batchedArgs)
             .then(function (data) {
-            return console.log(data) ||
-                $callbacks.map(function (fn) { return fn(data); });
+            return $c.map(function (fn) { return fn(data); });
         });
     });
     return function (query, args) {
