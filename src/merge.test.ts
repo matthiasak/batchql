@@ -99,6 +99,23 @@ export class Test {
     "shouldParsePrograms()"() {
         should(batch(q4, q41)).beOkay() //q42
         console.log(batch(q4, q41))
+
+   //      console.log(
+	  //       batch(
+	  //       `query Person($id: ID!){
+			// 	person(id: $id){
+			// 		name
+	  //               siblings { name }
+	  //           }
+			// }`, 
+	  //       `query Person($id: ID!){
+			// 	person(id: $id){
+	  //               email
+			// 		testField
+			// 		testField2
+	  //           }
+			// }`)
+	  //   )
 	}
 
 	// "shouldBatchAndResolve()"() {

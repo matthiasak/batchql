@@ -7,7 +7,8 @@
     "start": "tsc -w src/batchql.ts --outDir build -d",
     "prebuild": "rimraf build/*",
     "build": "NODE_ENV=production tsc src/batchql.ts --outDir build -d; echo \"done\";",
-    "test": "node fuse.js test"
+    "test": "node fuse.js test",
+    "publish": "npm run build; git commit -am \"snapshot\"; npm version patch; git push origin master; npm publish;"
   },
   "repository": {
     "type": "git",

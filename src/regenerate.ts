@@ -6,7 +6,7 @@ import {flatten, first, groupBy, joinBy, only, selectMany} from './utils'
 const generateOpArgList = args => {
     if(!args || args.length === 0) return ''
     
-    return '(' + args.map(a => `${a.name}: ${a.type}`).join(',') + ')'
+    return '(' + args.map(a => `${a.name}: ${a.type}`).join(', ') + ')'
 }
 
 const generateValue = (value, type) => {
@@ -18,7 +18,7 @@ const generateValue = (value, type) => {
     // if(value instanceof Array) return '[' + value.map(generateValue) + ']'
     if(type === 'arg')
         return '{' + 
-            value.map(v => `${v.name}:${generateValue(v.value, v.valueType)}`).join(',') +
+            value.map(v => `${v.name}:${generateValue(v.value, v.valueType)}`).join(', ') +
             '}'
     return `"${value}"`
 }
@@ -31,7 +31,7 @@ const generateFilterArgs = args => {
         .map(({name, value, valueType}) => {
         	return `${name}: ${generateValue(value, valueType)}`
     	})
-        .join(',') +
+        .join(', ') +
         ')'
 }
 
@@ -46,14 +46,13 @@ const generateFields = args => {
         	if(type === 'name') return value
     	})
         .join(' ') +
-        '}'
+    '}'
 }
 
 const generateSelectionSet = set => {
     if(!set || set.length === 0) return '{}'
     
-    return '{' +
-        set
+    return set
         .map(({value, filterArgs, fields, alias, items}) => {
         	return (alias ? `${alias} : ` : '') + 
                 value + 
@@ -66,12 +65,11 @@ const generateSelectionSet = set => {
                         )
                 )
     	})
-    	.join(' ') +
-    '}'
+    	.join(' ')
 }
 
 const generateQuery = ({type, name, opArgList, children}) => 
-    `${type} ${name || ''} ${generateOpArgList(opArgList)} ${generateSelectionSet(children)}`
+    `${type} ${name || ''} ${generateOpArgList(opArgList)} ${generateFields(children)}`
 
 const generateFragment = ({name, target, children:child}) =>
     `fragment ${name} on ${target} ${generateFields(child.items)}`
