@@ -39,29 +39,36 @@ export const mux = (getter, wait=100) => {
             ({ query='', args={} }) => 
                 $queries({query, args}),
         
-		send = debounce($ => {
-                let data = payload(),
-                    $q = data.map(x => x.query),
-                    $a = data.map(x => x.args),
-                    $c = $callbacks()
-                
-                // clear
-                $queries(false)
-                $callbacks(false)
-
-                let batchedQuery = batch(...$q),
-                    batchedArgs = $a.reduce((acc,x) => Object.assign(acc, x), {})
-
-				getter(batchedQuery, batchedArgs)
-                .then(data => 
-                    $callbacks.map(fn => fn(data)))
-            }
-            , wait),
-            
+		send = obs(),
+    
 		queue = cb => {
-                $callbacks(cb)
-                send()
-            }
+            $callbacks(cb)
+            send(true)
+        }
+
+
+    send
+    .debounce(wait)
+    .then(() => {
+        let data = payload(),
+            $q = data.map(x => x.query),
+            $a = data.map(x => x.args),
+            $c = $callbacks()
+
+        console.log('send')
+        
+        // clear
+        $queries(false)
+        $callbacks(false)
+
+        let batchedQuery = batch(...$q),
+            batchedArgs = $a.reduce((acc,x) => Object.assign(acc, x), {})
+
+        getter(batchedQuery, batchedArgs)
+        .then(data => 
+            console.log(data) ||
+            $callbacks.map(fn => fn(data)))
+    })
 
 	return (query, args) => {
         append({query, args})

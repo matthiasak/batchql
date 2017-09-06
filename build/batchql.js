@@ -30,20 +30,25 @@ exports.mux = function (getter, wait) {
         .reduce(appendOrClear, []), append = function (_a) {
         var _b = _a.query, query = _b === void 0 ? '' : _b, _c = _a.args, args = _c === void 0 ? {} : _c;
         return $queries({ query: query, args: args });
-    }, send = debounce(function ($) {
+    }, send = clan_fp_1.obs(), queue = function (cb) {
+        $callbacks(cb);
+        send(true);
+    };
+    send
+        .debounce(wait)
+        .then(function () {
         var data = payload(), $q = data.map(function (x) { return x.query; }), $a = data.map(function (x) { return x.args; }), $c = $callbacks();
+        console.log('send');
         // clear
         $queries(false);
         $callbacks(false);
         var batchedQuery = exports.batch.apply(void 0, $q), batchedArgs = $a.reduce(function (acc, x) { return Object.assign(acc, x); }, {});
         getter(batchedQuery, batchedArgs)
             .then(function (data) {
-            return $callbacks.map(function (fn) { return fn(data); });
+            return console.log(data) ||
+                $callbacks.map(function (fn) { return fn(data); });
         });
-    }, wait), queue = function (cb) {
-        $callbacks(cb);
-        send();
-    };
+    });
     return function (query, args) {
         append({ query: query, args: args });
         return new Promise(function (res) { return queue(function (d) { return res(d); }); });
