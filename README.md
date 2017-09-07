@@ -10,7 +10,7 @@ BatchQL is a language-level query optimizer for GraphQL.
 2. Language level parsing and query optimizations have not been fully completed for fragment expansions and directives.
 3. Query arguments from parallel queries can be shared since queries are batched.
 
-## Installation
+## Installation & Usage
 
 ```sh
 npm install --save batchql
@@ -40,6 +40,46 @@ makeQuery('query { allPersons { age } }')
   .then(({data}) => {
     data // { allpersons: [{name: 'Test', email: 'test@test.com', age: 38}, ...] }
   })
+```
+
+## Playground
+
+You can play with the code by copy+pasting the following into https://matthiasak.github.io/arbiter-frame:
+
+```js
+const app = () => {
+    const {batch, fetcher, mux} = batchql,
+          mock = (query, args) => 
+            log(query, args) || 
+            new Promise(res => {
+                setTimeout(() => res({query, args}), 500)
+            })
+    
+    const queries = [
+        `query Person($id: ID!){
+          person(id: $id){
+            name
+            siblings { name }
+          }
+        }`, 
+        `query Person($profileId: ID!){
+          person(id: $profileId){
+            testField
+            testField2
+          }
+        }`
+    ]
+    
+    const get = mux(mock, 2000)
+    
+    get(queries[0], {id: 1})
+    .then(d => log('--',d))
+    
+    get(queries[1], {id: 2})
+    .then(d => log('---',d))
+}
+
+require('batchql').then(app).catch(e => { log(e+'') })
 ```
 
 ## This is Dark Magic...
