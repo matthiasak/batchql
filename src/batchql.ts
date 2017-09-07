@@ -38,9 +38,9 @@ export const mux = (getter, wait=100) => {
             ({ query='', args={} }) => 
                 $queries({query, args}),
         
-		send = obs(),
+        send = obs(),
     
-		queue = cb => {
+        queue = cb => {
             $callbacks(cb)
             send(true)
         }
@@ -66,10 +66,10 @@ export const mux = (getter, wait=100) => {
             $c.map(fn => fn(data)))
     })
 
-	return (query, args) => {
+    return (query, args) => {
         append({query, args})
         return new Promise(res => queue(d => res(d)))
-	}
+    }
 }
 
 export default mux
