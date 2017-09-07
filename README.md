@@ -48,13 +48,15 @@ You can play with the code by copy+pasting the following into https://matthiasak
 
 ```js
 const app = () => {
+    // extract resources
     const {batch, fetcher, mux} = batchql,
+          // create a mock function
+          // returns  Promise that resolves back what it received after 500ms
           mock = (query, args) => 
             log(query, args) || 
-            new Promise(res => {
-                setTimeout(() => res({query, args}), 500)
-            })
+            new Promise(res => res({query, args}))
     
+    // create two queries that can batch down to person() and combine fields into a single query
     const queries = [
         `query Person($id: ID!){
           person(id: $id){
@@ -62,21 +64,26 @@ const app = () => {
             siblings { name }
           }
         }`, 
-        `query Person($profileId: ID!){
-          person(id: $profileId){
+        `query Person($id: ID!){
+          person(id: id){
             testField
             testField2
           }
         }`
     ]
     
-    const get = mux(mock, 2000)
+    // create twenty query strings to show how much this can batch (1 query, resolve data to 20 Promises)
+    const repeat = (arr, n) => 
+      new Array(n)
+      .fill(true)
+      .reduce(acc => acc.concat(arr), [])
     
-    get(queries[0], {id: 1})
-    .then(d => log('--',d))
+    let manyQueries = repeat(queries, 10) // repeat a bunch of the queries to simulate many parallel requests
+    const get = mux(mock, 1000) // mux takes a 'fetcher' and a time frame to collect queries before sending to the GraphQL endpoint
+    // mock() is given the batched query string and query args
     
-    get(queries[1], {id: 2})
-    .then(d => log('---',d))
+    // call each of the individual queries
+    manyQueries.map(q => get(q, {id: 1}).then(d => log('--',d)))
 }
 
 require('batchql').then(app).catch(e => { log(e+'') })
