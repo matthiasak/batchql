@@ -1,5 +1,4 @@
 import {obs} from 'clan-fp'
-const debounce = require('lodash.debounce')
 
 import merge from './merge'
 import regenerate from './regenerate'

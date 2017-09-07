@@ -1,7 +1,6 @@
 "use strict";
 exports.__esModule = true;
 var clan_fp_1 = require("clan-fp");
-var debounce = require('lodash.debounce');
 var merge_1 = require("./merge");
 var regenerate_1 = require("./regenerate");
 var combinators_1 = require("./combinators");
