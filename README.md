@@ -119,6 +119,20 @@ You can check out each piece in the various files under the `/src` folder.
 - `/src/regenerate.ts` - code for generating a GraphQL string from an AST
 - `/src/batchql.ts` - code for the muxer, a general fetcher, and the batch method
 
+## Embracing parser combinators
+
+> Changing the language is important, but it is not enough. Another component is required to help fix logical bugs, and make sure parsers are both easier to write and do not contain errors.
+
+Many low-level parsers ‘in the wild’ are written by hand, often because they need to deal with binary formats, or in a quest for better performance. Often these end up with hard to maintain code. At the other end of the spectrum there are parser generators, which tend to produce parsers of good quality but still present challenges in writing the grammar and integrating context specific libraries.
+
+In between these two choices lie parser combinators.
+
+> Parser combinators propose a middle ground between hand-written parsers and generated parsers. They are made of small functions that handle basic parts of a format, like recognizing a word in ASCII characters or a null byte. Those functions are then composed in more useful building blocks like the pair combinator that applies two parsers in sequence, or the choice combinator that tries different parsers until one of them succeeds.
+
+The functions are completely deterministic and hold no mutable state. The deterministic behaviour of parser combinators simplifies writing the state machine that manages data accumulation.
+
+- [Writing parsers like it is 2017](http://spw17.langsec.org/papers/chifflier-parsing-in-2017.pdf) Chifflier & Couprie, SPW’17
+
 ## Strengths of this approach
 
 If you choose to create "Service Oriented Components", meaning your components can request their own data (such as `onMount`), you run into sometimes 5 or 10 parallel graphql requests heading to your server:
