@@ -4,11 +4,7 @@
 
 BatchQL is a language-level query optimizer for GraphQL. 
 
-**Note:** Not all GraphQL features are perfectly supported, there will be some caveats that come with the usage of a tool like this.
-
-1. Your batched queries will return data that you asked for, but may have additional attributes on the tree of data returned. You should not depend on this extra data always existing. Future iterations will produce a nested reverse-mapping feature that will only return the data from a particular query.
-2. Language level parsing and query optimizations have not been fully completed for fragment expansions and directives.
-3. Query arguments from parallel queries can be shared since queries are batched.
+**Note:** Not all GraphQL features are perfectly supported, there will be some caveats that come with the usage of a tool like this. Right now, you should handle mutations and subscriptions through standard means, as the batching logic has been written with queries in mind. But mutations are really close to working :)
 
 ## Installation & Usage
 
