@@ -9,7 +9,7 @@ const opType = either(token('query', 'opType'), token('mutation', 'opType'), tok
 const name = token(/^[a-z][a-z0-9_]*/i, 'name') //const name = token('\\w+', 'name')
 const alias = token(/^[a-z][a-z0-9_]*/i, 'alias')
 const variableName = token('\\$\\w+', 'variableName')
-const scalarType = token(/^[a-z]+\!?/im, 'type')
+const scalarType = token('[-_a-z]+\\!?', 'type')
 const typeClass =
 	either(
         scalarType,

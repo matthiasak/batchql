@@ -1,7 +1,7 @@
 //////////////////////////////////
 // query generation
 //////////////////////////////////
-import {flatten, first, groupBy, joinBy, only, selectMany} from './utils'
+import {flatten, first, groupBy, joinBy, only, selectMany, ohash} from './utils'
 
 const findNameConflicts = (query, _q = query || []) => 
     _q
@@ -35,8 +35,8 @@ const applyVariableRenames = (queries, varRenames = findNameConflicts(queries)) 
             applyOpArgListRenames(target.opArgList, oldName, newName)
             applySelectionSetRenames(
                 ((target.children || []) instanceof Array ? target.children : [target.children])
-                .filter(child => child.type === 'selectionSet' && child.items !== undefined)
-                .reduce((acc, child) => [...acc, ...child.items], []), 
+                    .filter(child => child.type === 'selectionSet' && child.items !== undefined)
+                    .reduce((acc, child) => [...acc, ...child.items], []),
                 oldName, 
                 newName
             )
@@ -86,32 +86,35 @@ const applyNestedArgRename = (nestedArg, oldName, newName) => {
  * etc...
 */
 const buildExtractionMap = (fields, fieldsFromOtherQueries) => 
-    fields.reduce((acc, f) => {
-        const key = f.alias || f.value,
-            {counts, result} = acc
-        f.__visited = true
-        counts[key] = (counts[key] || 0) + 1
-        const resultKey = counts[key] <= 1 ? key : `${key}_${counts[key]}::${key}`
-        const similarlyNamedFields = 
-            fields
-            .concat(fieldsFromOtherQueries)
-            .filter(f2 => 
-                !f2.__visited && 
-                (f2 !== f) && 
-                (f2.alias || f2.value) === key
-            )
+    fields
+    .reduce((acc, f) => {
+        let key = f.alias || f.value,
+            resultKey = key
+        const filterArgHash = ohash(f.filterArgs)
             
-        result[resultKey] = 
-            !!f.fields ? 
-            buildExtractionMap(f.fields.items, similarlyNamedFields) :
+        f.__visited = true
+
+        const similarlyNamedVisitedFieldsWithDiffFilterArgs = 
+            fields
+            .concat(flatten(fieldsFromOtherQueries))
+            .filter(f2 => 
+                (f2.__visited === true) && 
+                (f2 !== f) && 
+                (f2.alias || f2.value) === key &&
+                ohash(f2.filterArgs) !== filterArgHash)
+        
+        if(similarlyNamedVisitedFieldsWithDiffFilterArgs.length >= 1){
+            f.alias = `${key}_${similarlyNamedVisitedFieldsWithDiffFilterArgs.length}`
+            resultKey = `${key}_${similarlyNamedVisitedFieldsWithDiffFilterArgs.length}::${key}`
+        }
+            
+        acc[resultKey] = 
+            (f.fields !== undefined) ? 
+            buildExtractionMap(f.fields.items, similarlyNamedVisitedFieldsWithDiffFilterArgs) :
             null
 
         return acc
-    }, {
-        counts: {},
-        result: {}
-    })
-    .result
+    }, {})
 
 const applyAliasingToCollidingFieldNames = (queries=[]) =>
     queries

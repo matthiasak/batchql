@@ -19,8 +19,22 @@ export const batch = (...programs) => {
 }
 
 export const fetcher = (url) => (query, args) =>
-    fetch(url, { method: 'POST', body: JSON.stringify({ query, variables: args }) })
+    console.table(args) ||
+    console.log(query) ||
+    fetch(
+        url, 
+        { 
+            method: 'POST', 
+            headers: {
+                "Content-Type": 'application/json'
+            }, 
+            body: JSON.stringify({ query, variables: args }) 
+        })
     .then(r => r.json())
+    .then(f => {
+        if(f.errors) throw new Error(f.errors.map(e => '\n- '+e.message).join(''))
+        return f.data
+    })
     
 const appendOrClear = (acc,x) => {
     if(x === false) return []
@@ -37,25 +51,30 @@ const applyQueryVarRenames = (varMap, renameMap) =>
     }, {})
 
 const applyExtractionMap = (data, extractionMap) => 
-    Object
-    .keys(extractionMap)
-    .reduce(
-        (acc,key) => {
-            const dataTarget = data[key]
-            if(dataTarget instanceof Array){
-                acc[key] = 
-                    dataTarget
-                    .map(item => applyExtractionMap(item, extractionMap[key]))
-            } else if(dataTarget instanceof Object){
-                acc[key] = applyExtractionMap(dataTarget,extractionMap[key])
-            } else if(dataTarget !== undefined){
-                acc[key] = dataTarget
-            }
-            return acc
-        },
-        {})
+    console.log(extractionMap) ||
+    (data === null || data === undefined) ? 
+        data :
+        Object
+        .keys(extractionMap)
+        .reduce(
+            (acc,key) => {
+                const [actualKey, renamedFrom] = key.split('::')
+                const dataTarget = data[actualKey]
 
-export const mux = (getter=fetcher, wait=60) => {
+                if(dataTarget instanceof Array){
+                    acc[renamedFrom || actualKey] = 
+                        dataTarget
+                        .map(item => applyExtractionMap(item, extractionMap[key]))
+                } else if(dataTarget instanceof Object){
+                    acc[renamedFrom || actualKey] = applyExtractionMap(dataTarget,extractionMap[key])
+                } else if(dataTarget !== undefined){
+                    acc[renamedFrom || actualKey] = dataTarget
+                }
+                return acc
+            },
+            {})
+
+export const mux = (getter, wait=60) => {
     const $queries = obs(),
         $callbacks = obs(),
         $data = obs(),

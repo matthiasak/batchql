@@ -85,28 +85,29 @@ var applyNestedArgRename = function (nestedArg, oldName, newName) {
  * etc...
 */
 var buildExtractionMap = function (fields, fieldsFromOtherQueries) {
-    return fields.reduce(function (acc, f) {
-        var key = f.alias || f.value, counts = acc.counts, result = acc.result;
+    return fields
+        .reduce(function (acc, f) {
+        var key = f.alias || f.value, resultKey = key;
+        var filterArgHash = utils_1.ohash(f.filterArgs);
         f.__visited = true;
-        counts[key] = (counts[key] || 0) + 1;
-        var resultKey = counts[key] <= 1 ? key : key + "_" + counts[key] + "::" + key;
-        var similarlyNamedFields = fields
-            .concat(fieldsFromOtherQueries)
+        var similarlyNamedVisitedFieldsWithDiffFilterArgs = fields
+            .concat(utils_1.flatten(fieldsFromOtherQueries))
             .filter(function (f2) {
-            return !f2.__visited &&
+            return (f2.__visited === true) &&
                 (f2 !== f) &&
-                (f2.alias || f2.value) === key;
+                (f2.alias || f2.value) === key &&
+                utils_1.ohash(f2.filterArgs) !== filterArgHash;
         });
-        result[resultKey] =
-            !!f.fields ?
-                buildExtractionMap(f.fields.items, similarlyNamedFields) :
+        if (similarlyNamedVisitedFieldsWithDiffFilterArgs.length >= 1) {
+            f.alias = key + "_" + similarlyNamedVisitedFieldsWithDiffFilterArgs.length;
+            resultKey = key + "_" + similarlyNamedVisitedFieldsWithDiffFilterArgs.length + "::" + key;
+        }
+        acc[resultKey] =
+            (f.fields !== undefined) ?
+                buildExtractionMap(f.fields.items, similarlyNamedVisitedFieldsWithDiffFilterArgs) :
                 null;
         return acc;
-    }, {
-        counts: {},
-        result: {}
-    })
-        .result;
+    }, {});
 };
 var applyAliasingToCollidingFieldNames = function (queries) {
     if (queries === void 0) { queries = []; }

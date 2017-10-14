@@ -17,8 +17,21 @@ exports.batch = function () {
     };
 };
 exports.fetcher = function (url) { return function (query, args) {
-    return fetch(url, { method: 'POST', body: JSON.stringify({ query: query, variables: args }) })
-        .then(function (r) { return r.json(); });
+    return console.table(args) ||
+        console.log(query) ||
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                "Content-Type": 'application/json'
+            },
+            body: JSON.stringify({ query: query, variables: args })
+        })
+            .then(function (r) { return r.json(); })
+            .then(function (f) {
+            if (f.errors)
+                throw new Error(f.errors.map(function (e) { return '\n- ' + e.message; }).join(''));
+            return f.data;
+        });
 }; };
 var appendOrClear = function (acc, x) {
     if (x === false)
@@ -35,26 +48,29 @@ var applyQueryVarRenames = function (varMap, renameMap) {
     }, {});
 };
 var applyExtractionMap = function (data, extractionMap) {
-    return Object
-        .keys(extractionMap)
-        .reduce(function (acc, key) {
-        var dataTarget = data[key];
-        if (dataTarget instanceof Array) {
-            acc[key] =
-                dataTarget
-                    .map(function (item) { return applyExtractionMap(item, extractionMap[key]); });
-        }
-        else if (dataTarget instanceof Object) {
-            acc[key] = applyExtractionMap(dataTarget, extractionMap[key]);
-        }
-        else if (dataTarget !== undefined) {
-            acc[key] = dataTarget;
-        }
-        return acc;
-    }, {});
+    return console.log(extractionMap) ||
+        (data === null || data === undefined) ?
+        data :
+        Object
+            .keys(extractionMap)
+            .reduce(function (acc, key) {
+            var _a = key.split('::'), actualKey = _a[0], renamedFrom = _a[1];
+            var dataTarget = data[actualKey];
+            if (dataTarget instanceof Array) {
+                acc[renamedFrom || actualKey] =
+                    dataTarget
+                        .map(function (item) { return applyExtractionMap(item, extractionMap[key]); });
+            }
+            else if (dataTarget instanceof Object) {
+                acc[renamedFrom || actualKey] = applyExtractionMap(dataTarget, extractionMap[key]);
+            }
+            else if (dataTarget !== undefined) {
+                acc[renamedFrom || actualKey] = dataTarget;
+            }
+            return acc;
+        }, {});
 };
 exports.mux = function (getter, wait) {
-    if (getter === void 0) { getter = exports.fetcher; }
     if (wait === void 0) { wait = 60; }
     var $queries = clan_fp_1.obs(), $callbacks = clan_fp_1.obs(), $data = clan_fp_1.obs(), responses = $callbacks.reduce(appendOrClear, []), payload = $queries.reduce(appendOrClear, []), append = function (_a) {
         var _b = _a.query, query = _b === void 0 ? '' : _b, _c = _a.args, args = _c === void 0 ? {} : _c;
@@ -73,7 +89,6 @@ exports.mux = function (getter, wait) {
         var _a = exports.batch.apply(void 0, $q), mergedQuery = _a.mergedQuery, queryVariableRenames = _a.queryVariableRenames, extractionMaps = _a.extractionMaps, batchedArgs = $a.reduce(function (acc, x, i) {
             return Object.assign(acc, applyQueryVarRenames(x, queryVariableRenames[i]));
         }, {});
-        // console.log(applyExtractionMap(testdata[0], extractionMaps[1]))
         getter(mergedQuery, batchedArgs)
             .then(function (data) {
             return $c.map(function (fn, i) {

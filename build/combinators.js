@@ -9,7 +9,7 @@ var opType = parsers_1.either(parsers_1.token('query', 'opType'), parsers_1.toke
 var name = parsers_1.token(/^[a-z][a-z0-9_]*/i, 'name'); //const name = token('\\w+', 'name')
 var alias = parsers_1.token(/^[a-z][a-z0-9_]*/i, 'alias');
 var variableName = parsers_1.token('\\$\\w+', 'variableName');
-var scalarType = parsers_1.token(/^[a-z]+\!?/im, 'type');
+var scalarType = parsers_1.token('[-_a-z]+\\!?', 'type');
 var typeClass = parsers_1.either(scalarType, parsers_1.sequence(parsers_1.token('\\['), scalarType, parsers_1.token('\\]', parsers_1.maybe(parsers_1.token('\\!')))));
 // opArgList ($arg1: type, $arg2: type!, ...)
 var opArgListFn = parsers_1.sequence(parsers_1.ignore('\\('), parsers_1.readN(1, parsers_1.sequence(variableName, parsers_1.ignore(':'), typeClass, parsers_1.maybe(parsers_1.ignore(',')))), parsers_1.ignore('\\)'));

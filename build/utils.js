@@ -45,7 +45,7 @@ exports.ordered = function (obj) {
         var _a;
     }, {});
 };
-exports.ohash = function (obj) { return exports.hash(exports.ordered(obj)); };
+exports.ohash = function (obj) { return exports.hash(obj instanceof Object ? exports.ordered(obj) : {}); };
 exports.selectMany = function (arr, fn) {
     return arr.reduce(function (acc, x) { return acc.concat(fn(x)); }, []);
 };

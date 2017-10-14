@@ -36,7 +36,7 @@ export const ordered = obj =>
         [key]: obj[key] instanceof Object ? ordered(obj[key]) : obj[key]
     }), {})
 
-export const ohash = obj => hash(ordered(obj))
+export const ohash = obj => hash(obj instanceof Object ? ordered(obj) : {})
 
 export const selectMany = (arr, fn) =>
 	arr.reduce((acc,x) => acc.concat(fn(x)), [])
@@ -61,4 +61,5 @@ export const joinBy = (
         }, [])
 }
 
-export const only = (obj, ...keys) => keys.reduce((acc,key) => ({...acc, [key]: obj[key]}), {})
+export const only = (obj, ...keys) => 
+    keys.reduce((acc,key) => ({...acc, [key]: obj[key]}), {})

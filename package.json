@@ -4,7 +4,8 @@
   "description": "Don't just graphql, batchql.",
   "scripts": {
     "prestart": "rimraf build/*",
-    "start": "tsc -w src/batchql.ts --outDir build -d",
+    "start-old": "tsc -w src/batchql.ts --outDir build -d",
+    "start": "node fuse.js",
     "prebuild": "rimraf build/*",
     "build": "NODE_ENV=production tsc src/batchql.ts --outDir build -d; echo \"done\";",
     "test": "node fuse.js test",
