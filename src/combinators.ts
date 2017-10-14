@@ -9,11 +9,11 @@ const opType = either(token('query', 'opType'), token('mutation', 'opType'), tok
 const name = token(/^[a-z][a-z0-9_]*/i, 'name') //const name = token('\\w+', 'name')
 const alias = token(/^[a-z][a-z0-9_]*/i, 'alias')
 const variableName = token('\\$\\w+', 'variableName')
-const scalarType = token('[-_a-z]+\\!?', 'type')
+const scalarType = token(/^[\-_a-z]+\!?/i, 'type')
 const typeClass =
 	either(
-        scalarType,
-        sequence(token('\\['), scalarType, token('\\]', maybe(token('\\!'))))
+        sequence(token(/^\[/), scalarType, token(/^\]/), maybe(token(/^\!/)))),
+        scalarType
     )
 
 // opArgList ($arg1: type, $arg2: type!, ...)
@@ -32,12 +32,20 @@ const opArgListFn =
 
 const opArgList = s => {
     let v = opArgListFn(s)
+    // console.log(JSON.parse(JSON.stringify(v)))
     
     v.ast = {
         type: 'opArgList',
         value:
             flatten(v.ast)
-            .map(([a,b]) => ({name:a.value, type:b.value}))
+            .map(([a,b]) => 
+                ({
+                    name: a.value, 
+                    type:
+                        b instanceof Array ? 
+                        b.map(_ => _.value).join('') 
+                        : b.value
+                }))
 	}
     
     return v

@@ -5,7 +5,6 @@ import {flatten, first, groupBy, joinBy, only, selectMany} from './utils'
 
 const generateOpArgList = args => {
     if(!args || args.length === 0) return ''
-    
     return '(' + args.map(a => `${a.name}: ${a.type}`).join(', ') + ')'
 }
 
@@ -15,11 +14,12 @@ const generateValue = (value, type) => {
     if(type === 'number') return value
     if(type === 'boolean') return value ? 'true' : 'false'
     if(type === 'variableName') return value
-    // if(value instanceof Array) return '[' + value.map(generateValue) + ']'
+
     if(type === 'arg')
         return '{' + 
             value.map(v => `${v.name}:${generateValue(v.value, v.valueType)}`).join(', ') +
-            '}'
+        '}'
+    
     return `"${value}"`
 }
 

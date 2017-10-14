@@ -15,10 +15,10 @@ f(`query test {
 }`)
 .then(d => log(d))
 
-f(`query test($x: String!){
-    allUsers(filter: {name: $x}) {
+f(`query test($x: [String!]!, $y: [ID!]){
+    allUsers(filter: {name_in: $x, id_in: $y}) {
         name
         id
     }
-}`, {x: "Matt"})
+}`, {x: ["Matt"], y: [1] })
 .then(d => log(d))

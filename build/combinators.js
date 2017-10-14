@@ -9,18 +9,24 @@ var opType = parsers_1.either(parsers_1.token('query', 'opType'), parsers_1.toke
 var name = parsers_1.token(/^[a-z][a-z0-9_]*/i, 'name'); //const name = token('\\w+', 'name')
 var alias = parsers_1.token(/^[a-z][a-z0-9_]*/i, 'alias');
 var variableName = parsers_1.token('\\$\\w+', 'variableName');
-var scalarType = parsers_1.token('[-_a-z]+\\!?', 'type');
-var typeClass = parsers_1.either(scalarType, parsers_1.sequence(parsers_1.token('\\['), scalarType, parsers_1.token('\\]', parsers_1.maybe(parsers_1.token('\\!')))));
+var scalarType = parsers_1.token(/^[\-_a-z]+\!?/i, 'type');
+var typeClass = parsers_1.either(parsers_1.sequence(parsers_1.token(/^\[/), scalarType, parsers_1.token(/^\]/), parsers_1.maybe(parsers_1.token(/^\!/)))), scalarType;
 // opArgList ($arg1: type, $arg2: type!, ...)
 var opArgListFn = parsers_1.sequence(parsers_1.ignore('\\('), parsers_1.readN(1, parsers_1.sequence(variableName, parsers_1.ignore(':'), typeClass, parsers_1.maybe(parsers_1.ignore(',')))), parsers_1.ignore('\\)'));
 var opArgList = function (s) {
     var v = opArgListFn(s);
+    // console.log(JSON.parse(JSON.stringify(v)))
     v.ast = {
         type: 'opArgList',
         value: utils_1.flatten(v.ast)
             .map(function (_a) {
             var a = _a[0], b = _a[1];
-            return ({ name: a.value, type: b.value });
+            return ({
+                name: a.value,
+                type: b instanceof Array ?
+                    b.map(function (_) { return _.value; }).join('')
+                    : b.value
+            });
         })
     };
     return v;

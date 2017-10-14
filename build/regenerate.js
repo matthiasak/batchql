@@ -16,7 +16,6 @@ var generateValue = function (value, type) {
         return value ? 'true' : 'false';
     if (type === 'variableName')
         return value;
-    // if(value instanceof Array) return '[' + value.map(generateValue) + ']'
     if (type === 'arg')
         return '{' +
             value.map(function (v) { return v.name + ":" + generateValue(v.value, v.valueType); }).join(', ') +
