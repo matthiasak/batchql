@@ -44,49 +44,34 @@ makeQuery('query { allPersons { age } }')
 
 ## Playground
 
-You can play with the code by copy+pasting the following into https://matthiasak.github.io/arbiter-frame:
+You can play with the code by copy+pasting the following into https://matthiasak.github.io/arbiter-frame. Make sure to change the URL to a GraphQL endpoint. The following is waiting for you to create a free GraphQL endpoint at https://graph.cool, where you can just copy+paste the Simple API URL for a new project into the `fetcher` below.
 
 ```js
-const app = () => {
-    // extract resources
-    const {batch, fetcher, mux} = batchql,
-          // create a mock function
-          // returns  Promise that resolves back what it received after 500ms
-          mock = (query, args) => 
-            log(query, args) || 
-            new Promise(res => res({query, args}))
+
+const app = $ => {
+    const {mux, batch, fetcher} = batchql
+    const f = mux(fetcher('https://api.graph.cool/simple/v1/FF'), 100)
     
-    // create two queries that can batch down to person() and combine fields into a single query
-    const queries = [
-        `query Person($id: ID!){
-          person(id: $id){
-            name
-            siblings { name }
-          }
-        }`, 
-        `query Person($id: ID!){
-          person(id: id){
-            testField
-            testField2
-          }
-        }`
-    ]
+    f(`query test { allFiles { name } }`)
+    .then(d => log(d))
     
-    // create twenty query strings to show how much this can batch (1 query, resolve data to 20 Promises)
-    const repeat = (arr, n) => 
-      new Array(n)
-      .fill(true)
-      .reduce(acc => acc.concat(arr), [])
+    f(`query test { 
+      allFiles { name contentType } 
+      allUsers { name id }
+    }`)
+    .then(d => log(d))
     
-    let manyQueries = repeat(queries, 10) // repeat a bunch of the queries to simulate many parallel requests
-    const get = mux(mock, 1000) // mux takes a 'fetcher' and a time frame to collect queries before sending to the GraphQL endpoint
-    // mock() is given the batched query string and query args
-    
-    // call each of the individual queries
-    manyQueries.map(q => get(q, {id: 1}).then(d => log('--',d)))
+    f(`query test($x: [String!]!){
+      allUsers(filter: {name_in: $x}) {
+        name
+        id
+      }
+    }`, {x: "Matt"})
+    .then(d => log(d))
+    .catch(e => log(e))
 }
 
-require('batchql').then(app).catch(e => { log(e+'') })
+require('batchql@1.1.4').then(app).catch(e => log(e))
 ```
 
 ## This is Dark Magic...
@@ -122,9 +107,9 @@ We can actually parse GraphQL query strings into a lightweight Abstract Syntax T
 You can check out each piece in the various files under the `/src` folder.
 - `/src/parsers.ts` - code for parsing tokens
 - `/src/combinators.ts` - code for the parser combinators that contain the logic to parse entire GraphQL queries
-- `/src/merge.ts` - code for merging multiple ASTs into a single AST
+- `/src/merge.ts` - code for merging multiple ASTs into a single AST, generating extraction maps for parsing out the tree of data requested by each parallelized query, and logic for renaming query variables and aliases/query-fields that may have collisions (with built-in reverse maps)
 - `/src/regenerate.ts` - code for generating a GraphQL string from an AST
-- `/src/batchql.ts` - code for the muxer, a general fetcher, and the batch method
+- `/src/batchql.ts` - code for the muxer, a general fetcher, and the batch method, plus applying extraction maps to the returned data
 
 ## Embracing parser combinators
 
