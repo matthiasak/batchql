@@ -6,7 +6,7 @@ BatchQL is a language-level query optimizer for GraphQL.
 
 **Note:** Not all GraphQL features are perfectly supported, there will be some caveats that come with the usage of a tool like this. Right now, you should handle mutations and subscriptions through standard means, as the batching logic has been written with queries in mind. But mutations are really close to working :)
 
-## Installation & Usage
+## Installation
 
 ```sh
 npm install --save batchql
@@ -14,31 +14,7 @@ npm install --save batchql
 yarn add batchql
 ```
 
-```js
-import {batch, mux, fetcher} from 'batchql'
-// or just 
-// import mux from 'batchql' (mux is default export)
-
-const mergedQueries = batch('query { allPersons { name } }', 'query { allPersons { email } }', 'query { allPersons { age } }')
-mergedQueries // 'query { allPersons { name email age } }'
-
-const makeQuery = mux(fetcher)
-
-makeQuery('query { allPersons { name } }')
-  .then(({data}) => {
-    data // { allpersons: [{name: 'Test', email: 'test@test.com', age: 38}, ...] }
-  })
-makeQuery('query { allPersons { email } }')
-  .then(({data}) => {
-    data // { allpersons: [{name: 'Test', email: 'test@test.com', age: 38}, ...] }
-  })
-makeQuery('query { allPersons { age } }')
-  .then(({data}) => {
-    data // { allpersons: [{name: 'Test', email: 'test@test.com', age: 38}, ...] }
-  })
-```
-
-## Playground
+## Playground & Usage
 
 You can play with the code by copy+pasting the following into https://matthiasak.github.io/arbiter-frame. Make sure to change the URL to a GraphQL endpoint. The following is waiting for you to create a free GraphQL endpoint at https://graph.cool, where you can just copy+paste the Simple API URL for a new project into the `fetcher` below.
 
