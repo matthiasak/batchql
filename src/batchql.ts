@@ -51,7 +51,6 @@ const applyQueryVarRenames = (varMap, renameMap) =>
     }, {})
 
 const applyExtractionMap = (data, extractionMap) => 
-    console.log(extractionMap) ||
     (data === null || data === undefined) ? 
         data :
         Object

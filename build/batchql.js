@@ -48,8 +48,7 @@ var applyQueryVarRenames = function (varMap, renameMap) {
     }, {});
 };
 var applyExtractionMap = function (data, extractionMap) {
-    return console.log(extractionMap) ||
-        (data === null || data === undefined) ?
+    return (data === null || data === undefined) ?
         data :
         Object
             .keys(extractionMap)
