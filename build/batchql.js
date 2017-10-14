@@ -9,8 +9,12 @@ exports.batch = function () {
     for (var _i = 0; _i < arguments.length; _i++) {
         programs[_i] = arguments[_i];
     }
-    var asts = programs.map(combinators_1["default"]), combined = merge_1["default"].apply(void 0, asts);
-    return regenerate_1["default"](combined);
+    var asts = programs.map(combinators_1["default"]), _a = merge_1["default"].apply(void 0, asts), mergedQuery = _a.mergedQuery, extractionMaps = _a.extractionMaps, queryVariableRenames = _a.queryVariableRenames;
+    return {
+        mergedQuery: regenerate_1["default"](mergedQuery),
+        extractionMaps: extractionMaps,
+        queryVariableRenames: queryVariableRenames
+    };
 };
 exports.fetcher = function (url) { return function (query, args) {
     return fetch(url, { method: 'POST', body: JSON.stringify({ query: query, variables: args }) })
@@ -22,11 +26,37 @@ var appendOrClear = function (acc, x) {
     acc.push(x);
     return acc;
 };
+var applyQueryVarRenames = function (varMap, renameMap) {
+    return Object
+        .keys(varMap)
+        .reduce(function (acc, key) {
+        acc[key in renameMap ? renameMap[key] : key] = varMap[key];
+        return acc;
+    }, {});
+};
+var applyExtractionMap = function (data, extractionMap) {
+    return Object
+        .keys(extractionMap)
+        .reduce(function (acc, key) {
+        var dataTarget = data[key];
+        if (dataTarget instanceof Array) {
+            acc[key] =
+                dataTarget
+                    .map(function (item) { return applyExtractionMap(item, extractionMap[key]); });
+        }
+        else if (dataTarget instanceof Object) {
+            acc[key] = applyExtractionMap(dataTarget, extractionMap[key]);
+        }
+        else if (dataTarget !== undefined) {
+            acc[key] = dataTarget;
+        }
+        return acc;
+    }, {});
+};
 exports.mux = function (getter, wait) {
-    if (wait === void 0) { wait = 100; }
-    var $queries = clan_fp_1.obs(), $callbacks = clan_fp_1.obs(), $data = clan_fp_1.obs(), responses = $callbacks
-        .reduce(appendOrClear, []), payload = $queries
-        .reduce(appendOrClear, []), append = function (_a) {
+    if (getter === void 0) { getter = exports.fetcher; }
+    if (wait === void 0) { wait = 60; }
+    var $queries = clan_fp_1.obs(), $callbacks = clan_fp_1.obs(), $data = clan_fp_1.obs(), responses = $callbacks.reduce(appendOrClear, []), payload = $queries.reduce(appendOrClear, []), append = function (_a) {
         var _b = _a.query, query = _b === void 0 ? '' : _b, _c = _a.args, args = _c === void 0 ? {} : _c;
         return $queries({ query: query, args: args });
     }, send = clan_fp_1.obs(), queue = function (cb) {
@@ -40,10 +70,15 @@ exports.mux = function (getter, wait) {
         // clear
         $queries(false);
         $callbacks(false);
-        var batchedQuery = exports.batch.apply(void 0, $q), batchedArgs = $a.reduce(function (acc, x) { return Object.assign(acc, x); }, {});
-        getter(batchedQuery, batchedArgs)
+        var _a = exports.batch.apply(void 0, $q), mergedQuery = _a.mergedQuery, queryVariableRenames = _a.queryVariableRenames, extractionMaps = _a.extractionMaps, batchedArgs = $a.reduce(function (acc, x, i) {
+            return Object.assign(acc, applyQueryVarRenames(x, queryVariableRenames[i]));
+        }, {});
+        // console.log(applyExtractionMap(testdata[0], extractionMaps[1]))
+        getter(mergedQuery, batchedArgs)
             .then(function (data) {
-            return $c.map(function (fn) { return fn(data); });
+            return $c.map(function (fn, i) {
+                return fn(applyExtractionMap(data, extractionMaps[i]));
+            });
         });
     });
     return function (query, args) {

@@ -6,14 +6,15 @@ import {flatten, first} from './utils'
 import {token, ignore, interleave, sequence, either, maybe, readN} from './parsers'
 
 const opType = either(token('query', 'opType'), token('mutation', 'opType'), token('subscription', 'opType'))
-const name = token(/^[a-z][a-z0-9_]+/i, 'name') //const name = token('\\w+', 'name')
-const alias = token(/^[a-z][a-z0-9_]+/i, 'alias')
+const name = token(/^[a-z][a-z0-9_]*/i, 'name') //const name = token('\\w+', 'name')
+const alias = token(/^[a-z][a-z0-9_]*/i, 'alias')
 const variableName = token('\\$\\w+', 'variableName')
 const scalarType = token(/^[a-z]+\!?/im, 'type')
 const typeClass =
 	either(
         scalarType,
-        sequence(token(/\[/), scalarType, token(/\]/, maybe(token(/\!/)))))
+        sequence(token('\\['), scalarType, token('\\]', maybe(token('\\!'))))
+    )
 
 // opArgList ($arg1: type, $arg2: type!, ...)
 const opArgListFn =
@@ -72,25 +73,26 @@ const filterArgFn =
                     maybe(ignore(','))
                 )
             ),
-            ignore('\\}')
+            ignore('\\}'),
         ),
         value
     )
 
 const filterArg = s => {
-	let v = filterArgFn(s)
+    let v = filterArgFn(s)
     if(v.ast[0] instanceof Array) v.ast = flatten(v.ast)
     return v
 }
 
 const selectionArgsFn =
 	sequence(
-        ignore(/\(/),
-        readN(1, sequence(name, ignore(':'), filterArg, maybe(ignore(',')))),
-        ignore(/\)/))
+        ignore('\\('),
+        readN(0, sequence(name, ignore(':'), filterArg, maybe(ignore(',')))),
+        ignore('\\)')
+    )
 
 const selectionArgs = s => {
-	let v = selectionArgsFn(s)
+    let v = selectionArgsFn(s)
 
     const prep = ([a,b]) => 
         ({
@@ -119,7 +121,6 @@ const fragmentExpansion = s => {
 
 const intoSelection = arr => {
     if(!(arr instanceof Array)){ 
-        // jsonlog(arr)
         return arr // not a subquery
     }
     
@@ -141,7 +142,7 @@ const intoSelection = arr => {
 
 const selectionSetFn =
 	sequence(
-        ignore('{'),
+        ignore('\\{'),
         readN(
             1,
             sequence(
@@ -155,7 +156,7 @@ const selectionSetFn =
                 maybe(ignore(','))
             )
         ),
-        ignore('}'))
+        ignore('\\}'))
 
 const selectionSet = s => {
 	let v = selectionSetFn(s),
@@ -173,8 +174,6 @@ const statementFn = sequence(maybe(opType), name, maybe(opArgList), selectionSet
 const statement = s => {
     
 	let v = statementFn(s)
-    
-	// jsonlog(v.ast)
     
     let hasOptype = first(v.ast, (x,i) => x.type === 'opType'),
         hasQueryName = first(v.ast, (x,i) => x.type === 'name'),

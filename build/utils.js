@@ -49,11 +49,12 @@ exports.ohash = function (obj) { return exports.hash(exports.ordered(obj)); };
 exports.selectMany = function (arr, fn) {
     return arr.reduce(function (acc, x) { return acc.concat(fn(x)); }, []);
 };
-exports.joinBy = function (arr, rootProps, mapGroupedChildren, childrenKey) {
+exports.joinBy = function (arr, rootProps, mapGroupedChildren, childrenKey, hashProps) {
     if (rootProps === void 0) { rootProps = function (x) { return x; }; }
     if (mapGroupedChildren === void 0) { mapGroupedChildren = function (x) { return undefined; }; }
     if (childrenKey === void 0) { childrenKey = 'children'; }
-    var g = exports.groupBy(arr, function (x) { return exports.ohash(rootProps(x)); });
+    if (hashProps === void 0) { hashProps = rootProps; }
+    var g = exports.groupBy(arr, function (x) { return exports.ohash(hashProps(x)); });
     return Object
         .keys(g)
         .reduce(function (acc, key) {

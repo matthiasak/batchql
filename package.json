@@ -26,9 +26,9 @@
     "clan-fp": "^1.1.0"
   },
   "devDependencies": {
-    "fuse-box": "^2.2.31",
+    "fuse-box": "^2.3.3",
     "fuse-test-runner": "^1.0.14",
-    "rimraf": "^2.6.1",
+    "rimraf": "^2.6.2",
     "typescript": "^2.5.2"
   }
 }

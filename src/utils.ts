@@ -45,9 +45,10 @@ export const joinBy = (
     arr, 
     rootProps = x => x,
     mapGroupedChildren = x => undefined,
-    childrenKey = 'children'
+    childrenKey = 'children',
+    hashProps = rootProps
 ) => {
-    let g = groupBy(arr, x => ohash(rootProps(x)))
+    let g = groupBy(arr, x => ohash(hashProps(x)))
     return Object
         .keys(g)
         .reduce((acc,key) => {

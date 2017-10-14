@@ -1,14 +1,21 @@
 import {obs} from 'clan-fp'
-
 import merge from './merge'
 import regenerate from './regenerate'
 import parseProgram from './combinators'
 
 export const batch = (...programs) => {
     const asts = programs.map(parseProgram),
-        combined = merge(...asts)
-
-    return regenerate(combined)
+        {
+            mergedQuery,
+            extractionMaps,
+            queryVariableRenames
+        } = merge(...asts)
+    
+    return { 
+        mergedQuery: regenerate(mergedQuery), 
+        extractionMaps, 
+        queryVariableRenames 
+    }
 }
 
 export const fetcher = (url) => (query, args) =>
@@ -21,30 +28,45 @@ const appendOrClear = (acc,x) => {
     return acc
 }
 
-export const mux = (getter, wait=100) => {
+const applyQueryVarRenames = (varMap, renameMap) =>
+    Object
+    .keys(varMap)
+    .reduce((acc,key) => {
+        acc[key in renameMap ? renameMap[key] : key] = varMap[key]
+        return acc
+    }, {})
+
+const applyExtractionMap = (data, extractionMap) => 
+    Object
+    .keys(extractionMap)
+    .reduce(
+        (acc,key) => {
+            const dataTarget = data[key]
+            if(dataTarget instanceof Array){
+                acc[key] = 
+                    dataTarget
+                    .map(item => applyExtractionMap(item, extractionMap[key]))
+            } else if(dataTarget instanceof Object){
+                acc[key] = applyExtractionMap(dataTarget,extractionMap[key])
+            } else if(dataTarget !== undefined){
+                acc[key] = dataTarget
+            }
+            return acc
+        },
+        {})
+
+export const mux = (getter=fetcher, wait=60) => {
     const $queries = obs(),
         $callbacks = obs(),
         $data = obs(),
-
-        responses = 
-            $callbacks
-            .reduce(appendOrClear, []),
-
-        payload = 
-            $queries
-            .reduce(appendOrClear, []),
-
-        append = 
-            ({ query='', args={} }) => 
-                $queries({query, args}),
-        
+        responses = $callbacks.reduce(appendOrClear, []),
+        payload = $queries.reduce(appendOrClear, []),
+        append = ({ query='', args={} }) => $queries({query, args}),
         send = obs(),
-    
         queue = cb => {
             $callbacks(cb)
             send(true)
         }
-
 
     send
     .debounce(wait)
@@ -58,12 +80,16 @@ export const mux = (getter, wait=100) => {
         $queries(false)
         $callbacks(false)
 
-        let batchedQuery = batch(...$q),
-            batchedArgs = $a.reduce((acc,x) => Object.assign(acc, x), {})
+        let {mergedQuery, queryVariableRenames, extractionMaps} = batch(...$q),
+            batchedArgs = 
+                $a.reduce((acc, x, i) => 
+                    Object.assign(acc, applyQueryVarRenames(x, queryVariableRenames[i])), 
+                    {})
 
-        getter(batchedQuery, batchedArgs)
+        getter(mergedQuery, batchedArgs)
         .then(data => 
-            $c.map(fn => fn(data)))
+            $c.map((fn, i) => 
+                fn(applyExtractionMap(data, extractionMaps[i]))))
     })
 
     return (query, args) => {
