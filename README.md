@@ -46,7 +46,7 @@ const app = $ => {
     .catch(e => log(e))
 }
 
-require('batchql@1.1.7').then(app).catch(e => log(e))
+require('batchql@1.1.8').then(app).catch(e => log(e))
 ```
 
 ## This is Dark Magic...
