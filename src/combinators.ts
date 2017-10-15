@@ -32,7 +32,6 @@ const opArgListFn =
 
 const opArgList = s => {
     let v = opArgListFn(s)
-    // console.log(JSON.parse(JSON.stringify(v)))
     
     v.ast = {
         type: 'opArgList',
@@ -178,10 +177,10 @@ const selectionSet = s => {
     return v
 }
 
-const statementFn = sequence(maybe(opType), name, maybe(opArgList), selectionSet)
+const statementFn = sequence(maybe(opType), maybe(name), maybe(opArgList), selectionSet)
 const statement = s => {
     
-	let v = statementFn(s)
+    let v = statementFn(s)
     
     let hasOptype = first(v.ast, (x,i) => x.type === 'opType'),
         hasQueryName = first(v.ast, (x,i) => x.type === 'name'),
@@ -191,8 +190,8 @@ const statement = s => {
     		.reduce((acc,x) => acc + (x && 1 || 0), 0)
     
     v.ast = {
-        type: hasOptype.value,
-        name: hasQueryName && hasQueryName.value,
+        type: hasOptype && hasOptype.value || 'query',
+        name: hasQueryName && hasQueryName.value || 'DEFAULTNAME',
         opArgList: hasOpArgList && hasOpArgList.value,
         children: v.ast.slice(numItems)
     }

@@ -15,7 +15,6 @@ var typeClass = parsers_1.either(parsers_1.sequence(parsers_1.token(/^\[/), scal
 var opArgListFn = parsers_1.sequence(parsers_1.ignore('\\('), parsers_1.readN(1, parsers_1.sequence(variableName, parsers_1.ignore(':'), typeClass, parsers_1.maybe(parsers_1.ignore(',')))), parsers_1.ignore('\\)'));
 var opArgList = function (s) {
     var v = opArgListFn(s);
-    // console.log(JSON.parse(JSON.stringify(v)))
     v.ast = {
         type: 'opArgList',
         value: utils_1.flatten(v.ast)
@@ -94,14 +93,14 @@ var selectionSet = function (s) {
     };
     return v;
 };
-var statementFn = parsers_1.sequence(parsers_1.maybe(opType), name, parsers_1.maybe(opArgList), selectionSet);
+var statementFn = parsers_1.sequence(parsers_1.maybe(opType), parsers_1.maybe(name), parsers_1.maybe(opArgList), selectionSet);
 var statement = function (s) {
     var v = statementFn(s);
     var hasOptype = utils_1.first(v.ast, function (x, i) { return x.type === 'opType'; }), hasQueryName = utils_1.first(v.ast, function (x, i) { return x.type === 'name'; }), hasOpArgList = utils_1.first(v.ast, function (x, i) { return x.type === 'opArgList'; }), numItems = [hasOptype, hasQueryName, hasOpArgList]
         .reduce(function (acc, x) { return acc + (x && 1 || 0); }, 0);
     v.ast = {
-        type: hasOptype.value,
-        name: hasQueryName && hasQueryName.value,
+        type: hasOptype && hasOptype.value || 'query',
+        name: hasQueryName && hasQueryName.value || 'DEFAULTNAME',
         opArgList: hasOpArgList && hasOpArgList.value,
         children: v.ast.slice(numItems)
     };

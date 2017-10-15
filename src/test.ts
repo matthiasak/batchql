@@ -9,7 +9,7 @@ console.clear()
 f(`query test { allFiles { name } }`)
 .then(d => log(d))
 
-f(`query test { 
+f(`{ 
     allFiles { name contentType } 
     allUsers { name id }
 }`)
