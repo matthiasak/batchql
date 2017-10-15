@@ -1,4 +1,6 @@
-const {mux, batch, fetcher} = require('./batchql')
+const {mux, batch, fetcher, debug} = require('./batchql')
+debug(true)
+
 const f = mux(
     fetcher('https://api.graph.cool/simple/v1/FF'),
     100

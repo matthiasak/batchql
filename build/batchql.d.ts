@@ -1,3 +1,4 @@
+export { debug } from './parsers';
 export declare const batch: (...programs: any[]) => {
     mergedQuery: any;
     extractionMaps: any[];
