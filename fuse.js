@@ -15,6 +15,7 @@ Sparky.task("default", ["clean"], () => {
     build
     .bundle('test')
     .instructions("> test.ts")
+    .sourceMaps(true)
     .hmr()
     .watch()
 

@@ -2,28 +2,25 @@
 // Base functions / parsers + combinators
 /////////////////////////
 
+import {obs} from 'clan-fp'
+
 // returns a function that takes a string which parses 
 // the string according to a regexp or pattern, declaring the type of token
-export const token = (t, type, d=0, o='igm', mod=x=>x) => {
-    let m = s => {
-        let r = 
-            t instanceof RegExp 
-                ? t 
-                : new RegExp('^'+t, o)
-            , results = r.exec(s)
-
-        if(!results || results.length <= d) 
-            throw new Error(`Expected: '''${t}'''\nActual: '''${s}'''`)
-
-        return mod({
-            remaining: s.slice(results[d].length)
-            , matched: results[d]
-            , ast: {type: type || t+'', value: results[d]}
-        })
-    }
+export const token = (t, type=t+'', d=0, o='igm', mod=x=>x) => s => {
+    let r = t instanceof RegExp ? t : new RegExp('^'+t, o), 
+        results = r.exec(s)
     
-    return m
+    if(results === null || results.length <= d) 
+        throw new Error(JSON.stringify({expected: t+'', actual: s}))
+
+    return mod({
+        remaining: s.slice(results[d].length)
+        , matched: results[d]
+        , ast: {type: type, value: results[d]}
+    })
 }
+
+export const debug = obs(false)
 
 export const ignore = (...args) => {
     let nArgs = args
@@ -33,11 +30,17 @@ export const ignore = (...args) => {
 
 const ws = ignore('\\s*')
 
+const zip = (a, b) => {
+    let result = []
+    for(var i = 0, len = Math.max(a.length, b.length); i < len; i++){
+        if(a[i]) result.push(a[i])
+        if(b[i]) result.push(b[i])
+    }
+    return result
+}
+
 export const interleave = (splitter, tokenizers) =>
-    new Array(tokenizers.length)
-        .fill(true)
-    	.reduce((acc, x, i) => acc.concat([splitter, tokenizers[i]]), [])
-		.concat([splitter])
+    zip(new Array(tokenizers.length + 1).fill(splitter), tokenizers)
 
 export const sequence = (...tokenizers) => s =>
     interleave(ws, tokenizers)
@@ -56,10 +59,11 @@ export const either = (...tokenizers) => s => {
         try {
             return tokenizers[i](s)
         } catch(e) { 
-            errors.push(e)
+            errors.push(e.message)
         }
     }
-    throw new Error(`Either(...): ${s}\n\n${errors.map(e => '::->\n'+e+'').join('\n')}`)
+    debug() && console.warn(errors)
+    throw new Error(`Either failed.`)
 }
 
 export const maybe = tokenizer => s => {
@@ -74,20 +78,25 @@ export const readN = (n, tokenizer) => s => {
     let acc = {remaining: s, matched: '', ast: []}
         , current
         , count = 0
-        , error
+        , errors = []
 
     try {
         while((current = tokenizer(acc.remaining))){
             let {remaining, matched, ast, ignore} = current
-            if(remaining === acc.remaining) throw `Inf. loop in readN sequence.`
+            if(remaining === acc.remaining) throw `Infinite loop detected in readN sequence.`
             if(!ignore && ast) acc.ast.push(ast)
             acc.remaining = remaining
             acc.matched += matched
             count++
         }
-    } catch(e) { error = e }
+    } catch(e) { 
+        errors.push(e.message)
+    }
 
-    if(count < n) throw new Error(`Expected ${n}+ occurrences, but only have ${count}. Sub error:\n---\n${error}`)
+    if(count < n) {
+        debug() && console.warn(errors)
+        throw new Error(`Expected ${n}+ occurrences, but only have ${count}.`)
+    }
 
     return acc
 }

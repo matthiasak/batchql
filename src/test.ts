@@ -6,7 +6,7 @@ const f = mux(
 const log = (...args) => console.log(...args)
 console.clear()
 
-f(`query test { allFiles { name } }`)
+f(`query test ($id: ID!, $name: String!) { allFiles { name } }`)
 .then(d => log(d))
 
 f(`{ 

@@ -1,6 +1,7 @@
-export declare const token: (t: any, type: any, d?: number, o?: string, mod?: (x: any) => any) => (s: any) => any;
+export declare const token: (t: any, type?: string, d?: number, o?: string, mod?: (x: any) => any) => (s: any) => any;
+export declare const debug: any;
 export declare const ignore: (...args: any[]) => any;
-export declare const interleave: (splitter: any, tokenizers: any) => any;
+export declare const interleave: (splitter: any, tokenizers: any) => any[];
 export declare const sequence: (...tokenizers: any[]) => (s: any) => any;
 export declare const either: (...tokenizers: any[]) => (s: any) => any;
 export declare const maybe: (tokenizer: any) => (s: any) => any;

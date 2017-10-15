@@ -12,11 +12,10 @@ const variableName = token('\\$\\w+', 'variableName')
 const scalarType = token(/^[\-_a-z]+\!?/i, 'type')
 const typeClass =
 	either(
-        sequence(token(/^\[/), scalarType, token(/^\]/), maybe(token(/^\!/)))),
-        scalarType
+        scalarType,
+        sequence(token('\\['), scalarType, token('\\]'), maybe(token('\\!')))
     )
 
-// opArgList ($arg1: type, $arg2: type!, ...)
 const opArgListFn =
 	sequence(
         ignore('\\('),
@@ -27,8 +26,10 @@ const opArgListFn =
                 ignore(':'),
                 typeClass,
                 maybe(ignore(','))
-            )),
-        ignore('\\)'))
+            )
+        ),
+        ignore('\\)')
+    )
 
 const opArgList = s => {
     let v = opArgListFn(s)
@@ -178,8 +179,8 @@ const selectionSet = s => {
 }
 
 const statementFn = sequence(maybe(opType), maybe(name), maybe(opArgList), selectionSet)
+
 const statement = s => {
-    
     let v = statementFn(s)
     
     let hasOptype = first(v.ast, (x,i) => x.type === 'opType'),

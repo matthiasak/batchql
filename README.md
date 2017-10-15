@@ -21,8 +21,11 @@ You can play with the code by copy+pasting the following into https://matthiasak
 ```js
 
 const app = $ => {
-    const {mux, batch, fetcher} = batchql
+    const {mux, batch, fetcher, debug} = batchql
     const f = mux(fetcher('https://api.graph.cool/simple/v1/FF'), 100)
+
+    // want debug messages for parsing graphQL syntax? uncomment below
+    // debug(true)
     
     f(`query test { allFiles { name } }`)
     .then(d => log(d))
@@ -43,7 +46,7 @@ const app = $ => {
     .catch(e => log(e))
 }
 
-require('batchql@1.1.4').then(app).catch(e => log(e))
+require('batchql@1.1.7').then(app).catch(e => log(e))
 ```
 
 ## This is Dark Magic...

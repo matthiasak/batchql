@@ -10,8 +10,7 @@ var name = parsers_1.token(/^[_a-z][a-z0-9_]*/i, 'name'); //const name = token('
 var alias = parsers_1.token(/^[_a-z][a-z0-9_]*/i, 'alias');
 var variableName = parsers_1.token('\\$\\w+', 'variableName');
 var scalarType = parsers_1.token(/^[\-_a-z]+\!?/i, 'type');
-var typeClass = parsers_1.either(parsers_1.sequence(parsers_1.token(/^\[/), scalarType, parsers_1.token(/^\]/), parsers_1.maybe(parsers_1.token(/^\!/)))), scalarType;
-// opArgList ($arg1: type, $arg2: type!, ...)
+var typeClass = parsers_1.either(scalarType, parsers_1.sequence(parsers_1.token('\\['), scalarType, parsers_1.token('\\]'), parsers_1.maybe(parsers_1.token('\\!'))));
 var opArgListFn = parsers_1.sequence(parsers_1.ignore('\\('), parsers_1.readN(1, parsers_1.sequence(variableName, parsers_1.ignore(':'), typeClass, parsers_1.maybe(parsers_1.ignore(',')))), parsers_1.ignore('\\)'));
 var opArgList = function (s) {
     var v = opArgListFn(s);

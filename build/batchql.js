@@ -4,6 +4,8 @@ var clan_fp_1 = require("clan-fp");
 var merge_1 = require("./merge");
 var regenerate_1 = require("./regenerate");
 var combinators_1 = require("./combinators");
+var parsers_1 = require("./parsers");
+parsers_1.debug;
 exports.batch = function () {
     var programs = [];
     for (var _i = 0; _i < arguments.length; _i++) {
