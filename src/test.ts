@@ -11,7 +11,7 @@ f(`query test { allFiles { name } }`)
 
 f(`{ 
     allFiles { name contentType } 
-    allUsers { name id }
+    allUsers { name id _ordersMeta { count }}
 }`)
 .then(d => log(d))
 

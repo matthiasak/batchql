@@ -6,8 +6,8 @@ exports.__esModule = true;
 var utils_1 = require("./utils");
 var parsers_1 = require("./parsers");
 var opType = parsers_1.either(parsers_1.token('query', 'opType'), parsers_1.token('mutation', 'opType'), parsers_1.token('subscription', 'opType'));
-var name = parsers_1.token(/^[a-z][a-z0-9_]*/i, 'name'); //const name = token('\\w+', 'name')
-var alias = parsers_1.token(/^[a-z][a-z0-9_]*/i, 'alias');
+var name = parsers_1.token(/^[_a-z][a-z0-9_]*/i, 'name'); //const name = token('\\w+', 'name')
+var alias = parsers_1.token(/^[_a-z][a-z0-9_]*/i, 'alias');
 var variableName = parsers_1.token('\\$\\w+', 'variableName');
 var scalarType = parsers_1.token(/^[\-_a-z]+\!?/i, 'type');
 var typeClass = parsers_1.either(parsers_1.sequence(parsers_1.token(/^\[/), scalarType, parsers_1.token(/^\]/), parsers_1.maybe(parsers_1.token(/^\!/)))), scalarType;

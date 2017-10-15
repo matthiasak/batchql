@@ -6,8 +6,8 @@ import {flatten, first} from './utils'
 import {token, ignore, interleave, sequence, either, maybe, readN} from './parsers'
 
 const opType = either(token('query', 'opType'), token('mutation', 'opType'), token('subscription', 'opType'))
-const name = token(/^[a-z][a-z0-9_]*/i, 'name') //const name = token('\\w+', 'name')
-const alias = token(/^[a-z][a-z0-9_]*/i, 'alias')
+const name = token(/^[_a-z][a-z0-9_]*/i, 'name') //const name = token('\\w+', 'name')
+const alias = token(/^[_a-z][a-z0-9_]*/i, 'alias')
 const variableName = token('\\$\\w+', 'variableName')
 const scalarType = token(/^[\-_a-z]+\!?/i, 'type')
 const typeClass =
