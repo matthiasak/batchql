@@ -2,7 +2,9 @@ import {obs} from 'clan-fp'
 import merge from './merge'
 import regenerate from './regenerate'
 import parseProgram from './combinators'
-export {debug} from './parsers'
+import {debug} from './parsers'
+
+export {debug}
 
 export const batch = (...programs) => {
     const asts = programs.map(parseProgram),
