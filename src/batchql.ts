@@ -20,8 +20,7 @@ export const batch = (...programs) => {
 }
 
 export const fetcher = (url) => (query, args) =>
-    console.table(args) ||
-    console.log(query) ||
+    (debug() && console.log(query)) ||
     fetch(
         url, 
         { 

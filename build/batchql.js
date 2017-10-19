@@ -19,8 +19,7 @@ exports.batch = function () {
     };
 };
 exports.fetcher = function (url) { return function (query, args) {
-    return console.table(args) ||
-        console.log(query) ||
+    return (debug() && console.log(query)) ||
         fetch(url, {
             method: 'POST',
             headers: {
