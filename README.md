@@ -1,5 +1,7 @@
 # BatchQL
 
+![logo](./icon.svg)
+
 [![NPM](https://nodei.co/npm/batchql.png)](https://nodei.co/npm/batchql/)
 
 BatchQL is a language-level query optimizer for GraphQL. 
@@ -22,7 +24,9 @@ You can play with the code by copy+pasting the following into https://matthiasak
 
 const app = $ => {
     const {mux, batch, fetcher, debug} = batchql
-    const f = mux(fetcher('https://api.graph.cool/simple/v1/FF'), 100)
+
+    // register a free GraphQL endpoint at https://graph.cool
+    const f = mux(fetcher('https://api.graph.cool/simple/v1/...'), 100)
 
     // want debug messages for parsing graphQL syntax? uncomment below
     // debug(true)
@@ -227,3 +231,7 @@ After that, you'll find the code in the `./build` folder!
 ## Authors
 
 - Matthew Keas, [@matthiasak](https://twitter.com/@matthiasak). Need help / support? Create an issue or ping on Twitter.
+
+## Credits
+
+> Thanks to Amy Morgan on The Noun Project for the logo!
