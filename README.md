@@ -73,6 +73,13 @@ mergedQueries
 
 This merely batched the queries together, but didn't do an actual logical merge of the queries. But no more! Now we have an actual tree-merging batching mechanisms that doesn't batch _messages together_, it batches the _logical queries_. Yey!
 
+```js
+const mergedQueries = batch('query { allPersons { name } }', 'query { allPersons { email } }', 'query { allPersons { age } }')
+mergedQueries
+// query { allPersons { name email age }  }
+// sooooooooooooo much more efficient as queries get larger
+```
+
 How?
 
 Parsers, combinators, and parser-combinators.
