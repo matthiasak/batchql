@@ -95,11 +95,12 @@ var buildExtractionMap = function (fields, fieldsFromOtherQueries) {
             .filter(function (f2) {
             return (f2.__visited === true) &&
                 (f2 !== f) &&
-                (f2.alias || f2.value) === key &&
+                (f2.__oldKey || f2.alias || f2.value) === key &&
                 utils_1.ohash(f2.filterArgs) !== filterArgHash;
         });
         if (similarlyNamedVisitedFieldsWithDiffFilterArgs.length >= 1) {
             f.alias = key + "_" + similarlyNamedVisitedFieldsWithDiffFilterArgs.length;
+            f.__oldKey = key;
             resultKey = key + "_" + similarlyNamedVisitedFieldsWithDiffFilterArgs.length + "::" + key;
         }
         acc[resultKey] =

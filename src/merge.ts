@@ -100,14 +100,16 @@ const buildExtractionMap = (fields, fieldsFromOtherQueries) =>
             .filter(f2 => 
                 (f2.__visited === true) && 
                 (f2 !== f) && 
-                (f2.alias || f2.value) === key &&
-                ohash(f2.filterArgs) !== filterArgHash)
+                (f2.__oldKey || f2.alias || f2.value) === key &&
+                ohash(f2.filterArgs) !== filterArgHash
+            )
         
         if(similarlyNamedVisitedFieldsWithDiffFilterArgs.length >= 1){
             f.alias = `${key}_${similarlyNamedVisitedFieldsWithDiffFilterArgs.length}`
+            f.__oldKey = key
             resultKey = `${key}_${similarlyNamedVisitedFieldsWithDiffFilterArgs.length}::${key}`
         }
-            
+
         acc[resultKey] = 
             (f.fields !== undefined) ? 
             buildExtractionMap(f.fields.items, similarlyNamedVisitedFieldsWithDiffFilterArgs) :

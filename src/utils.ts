@@ -9,7 +9,10 @@ export const first = (arr, fn) => {
 }
 
 export const flatten = (arr) => 
-	arr.reduce((acc, x) => [...acc, ...x], [])
+	arr.reduce((acc, x) =>
+        acc.concat(x instanceof Array ? x : [x]), 
+        []
+    )
 
 export const groupBy = (arr, fn) => 
 	arr.reduce((acc, x, i) => {

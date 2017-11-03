@@ -18,7 +18,9 @@ exports.first = function (arr, fn) {
     }
 };
 exports.flatten = function (arr) {
-    return arr.reduce(function (acc, x) { return acc.concat(x); }, []);
+    return arr.reduce(function (acc, x) {
+        return acc.concat(x instanceof Array ? x : [x]);
+    }, []);
 };
 exports.groupBy = function (arr, fn) {
     return arr.reduce(function (acc, x, i) {
