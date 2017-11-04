@@ -58,11 +58,15 @@ var applyExtractionMap = function (data, extractionMap) {
             var dataTarget = data[actualKey];
             if (dataTarget instanceof Array) {
                 acc[renamedFrom || actualKey] =
-                    dataTarget
-                        .map(function (item) { return applyExtractionMap(item, extractionMap[key]); });
+                    typeof extractionMap[key] === 'string' ?
+                        dataTarget :
+                        dataTarget.map(function (item) { return applyExtractionMap(item, extractionMap[key]); });
             }
             else if (dataTarget instanceof Object) {
-                acc[renamedFrom || actualKey] = applyExtractionMap(dataTarget, extractionMap[key]);
+                acc[renamedFrom || actualKey] =
+                    typeof extractionMap[key] === 'string' ?
+                        dataTarget :
+                        applyExtractionMap(dataTarget, extractionMap[key]);
             }
             else if (dataTarget !== undefined) {
                 acc[renamedFrom || actualKey] = dataTarget;

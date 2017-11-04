@@ -63,11 +63,15 @@ const applyExtractionMap = (data, extractionMap) =>
                 const dataTarget = data[actualKey]
 
                 if(dataTarget instanceof Array){
-                    acc[renamedFrom || actualKey] = 
-                        dataTarget
-                        .map(item => applyExtractionMap(item, extractionMap[key]))
+                    acc[renamedFrom || actualKey] =
+                        typeof extractionMap[key] === 'string' ?
+                            dataTarget :
+                            dataTarget.map(item => applyExtractionMap(item, extractionMap[key]))
                 } else if(dataTarget instanceof Object){
-                    acc[renamedFrom || actualKey] = applyExtractionMap(dataTarget,extractionMap[key])
+                    acc[renamedFrom || actualKey] = 
+                        typeof extractionMap[key] === 'string' ?
+                            dataTarget :
+                            applyExtractionMap(dataTarget,extractionMap[key])
                 } else if(dataTarget !== undefined){
                     acc[renamedFrom || actualKey] = dataTarget
                 }
