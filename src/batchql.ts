@@ -52,10 +52,10 @@ const applyQueryVarRenames = (varMap, renameMap) =>
         return acc
     }, {})
 
-const applyExtractionMap = (data, extractionMap) => 
-    (data === null || data === undefined) ? 
-        data :
-        Object
+const applyExtractionMap = (data, extractionMap) => {
+    if(data === null || data === undefined) return data
+        
+    return Object
         .keys(extractionMap)
         .reduce(
             (acc,key) => {
@@ -63,14 +63,14 @@ const applyExtractionMap = (data, extractionMap) =>
                 const dataTarget = data[actualKey]
 
                 if(dataTarget instanceof Array){
-                    acc[renamedFrom || actualKey] =
-                        typeof extractionMap[key] === 'string' ?
+                    acc[renamedFrom || actualKey] = 
+                        (extractionMap[key] === null || extractionMap[key] === undefined) ? 
                             dataTarget :
                             dataTarget.map(item => applyExtractionMap(item, extractionMap[key]))
                 } else if(dataTarget instanceof Object){
                     acc[renamedFrom || actualKey] = 
-                        typeof extractionMap[key] === 'string' ?
-                            dataTarget :
+                        (extractionMap[key] === null || extractionMap[key] === undefined) ? 
+                            data :
                             applyExtractionMap(dataTarget,extractionMap[key])
                 } else if(dataTarget !== undefined){
                     acc[renamedFrom || actualKey] = dataTarget
@@ -78,6 +78,7 @@ const applyExtractionMap = (data, extractionMap) =>
                 return acc
             },
             {})
+}
 
 export const mux = (getter, wait=60) => {
     const $queries = obs(),

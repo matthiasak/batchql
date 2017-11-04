@@ -22,7 +22,7 @@ Sparky.task("default", ["clean"], () => {
     build
     .dev({
         open: true,
-        port: 4444
+        port: 4445
     }, server => {
         const p = path.resolve("./src/test.html")
         const app = server.httpServer.app

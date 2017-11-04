@@ -49,30 +49,30 @@ var applyQueryVarRenames = function (varMap, renameMap) {
     }, {});
 };
 var applyExtractionMap = function (data, extractionMap) {
-    return (data === null || data === undefined) ?
-        data :
-        Object
-            .keys(extractionMap)
-            .reduce(function (acc, key) {
-            var _a = key.split('::'), actualKey = _a[0], renamedFrom = _a[1];
-            var dataTarget = data[actualKey];
-            if (dataTarget instanceof Array) {
-                acc[renamedFrom || actualKey] =
-                    typeof extractionMap[key] === 'string' ?
-                        dataTarget :
-                        dataTarget.map(function (item) { return applyExtractionMap(item, extractionMap[key]); });
-            }
-            else if (dataTarget instanceof Object) {
-                acc[renamedFrom || actualKey] =
-                    typeof extractionMap[key] === 'string' ?
-                        dataTarget :
-                        applyExtractionMap(dataTarget, extractionMap[key]);
-            }
-            else if (dataTarget !== undefined) {
-                acc[renamedFrom || actualKey] = dataTarget;
-            }
-            return acc;
-        }, {});
+    if (data === null || data === undefined)
+        return data;
+    return Object
+        .keys(extractionMap)
+        .reduce(function (acc, key) {
+        var _a = key.split('::'), actualKey = _a[0], renamedFrom = _a[1];
+        var dataTarget = data[actualKey];
+        if (dataTarget instanceof Array) {
+            acc[renamedFrom || actualKey] =
+                (extractionMap[key] === null || extractionMap[key] === undefined) ?
+                    dataTarget :
+                    dataTarget.map(function (item) { return applyExtractionMap(item, extractionMap[key]); });
+        }
+        else if (dataTarget instanceof Object) {
+            acc[renamedFrom || actualKey] =
+                (extractionMap[key] === null || extractionMap[key] === undefined) ?
+                    data :
+                    applyExtractionMap(dataTarget, extractionMap[key]);
+        }
+        else if (dataTarget !== undefined) {
+            acc[renamedFrom || actualKey] = dataTarget;
+        }
+        return acc;
+    }, {});
 };
 exports.mux = function (getter, wait) {
     if (wait === void 0) { wait = 60; }
