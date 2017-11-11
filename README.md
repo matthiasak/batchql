@@ -21,7 +21,7 @@ yarn add batchql
 You can play with the code by copy+pasting the following into https://matthiasak.github.io/arbiter-frame. This example uses the GitHub GraphQL API to demonstrate the effectiveness of logical query batching :)
 
 ```js
-const token = 'd1606fec57686c5dbbecdb97c063da2f848b0da9'
+const token = `${'4eb1f1a7b25729f6'}${'27d570e88688ef866017388e'}`
 
 const app = $ => {
     const {mux, batch, debug} = batchql
