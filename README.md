@@ -18,39 +18,84 @@ yarn add batchql
 
 ## Playground & Usage
 
-You can play with the code by copy+pasting the following into https://matthiasak.github.io/arbiter-frame. Make sure to change the URL to a GraphQL endpoint. The following is waiting for you to create a free GraphQL endpoint at https://graph.cool, where you can just copy+paste the Simple API URL for a new project into the `fetcher` below.
+You can play with the code by copy+pasting the following into https://matthiasak.github.io/arbiter-frame. This example uses the GitHub GraphQL API to demonstrate the effectiveness of logical query batching :)
 
 ```js
+const token = 'd1606fec57686c5dbbecdb97c063da2f848b0da9'
 
 const app = $ => {
-    const {mux, batch, fetcher, debug} = batchql
+    const {mux, batch, debug} = batchql
+    
+    const fetcher = (url) => (query, args) =>
+    (debug() && log({batchedQuery: query}, '')) ||
+    fetch(
+        url, 
+        { 
+            method: 'POST', 
+            headers: {
+                "Content-Type": 'application/json',
+                "Authorization": `Bearer ${token}`
+            }, 
+            body: JSON.stringify({ query, variables: args }) 
+        })
+    .then(r => r.json())
+    .then(f => {
+        if(f.errors) throw new Error(f.errors.map(e => '\n- '+e.message).join(''))
+        return f.data
+    })
 
     // register a free GraphQL endpoint at https://graph.cool
-    const f = mux(fetcher('https://api.graph.cool/simple/v1/...'), 100)
+    const f = mux(fetcher('https://api.github.com/graphql'), 100)
 
     // want debug messages for parsing graphQL syntax? uncomment below
-    // debug(true)
+    debug(true)
     
-    f(`query test { allFiles { name } }`)
-    .then(d => log(d))
-    
-    f(`query test { 
-      allFiles { name contentType } 
-      allUsers { name id }
-    }`)
-    .then(d => log(d))
-    
-    f(`query test($x: [String!]!){
-      allUsers(filter: {name_in: $x}) {
+    f(`($name: String!){ 
+      topic(name: $name) {
         name
-        id
+        relatedTopics {
+          id
+          name
+        }
       }
-    }`, {x: "Matt"})
-    .then(d => log(d))
-    .catch(e => log(e))
+    }`, {name: 'typescript'})
+    .then(d => log(d, ''))
+    
+    f(`($name: String!){ 
+      topic(name: $name) {
+        name
+        relatedTopics {
+          id
+          name
+        }
+      }
+    }`, {name: 'ruby'})
+    .then(d => log(d, ''))
+    
+    f(`($name: String!){ 
+      topic(name: $name) {
+        name
+        relatedTopics {
+          id
+          name
+        }
+      }
+    }`, {name: 'ruby'})
+    .then(d => log(d, ''))
+    
+    f(`($name: String!){ 
+      topic(name: $name) {
+        name
+        relatedTopics {
+          id
+          name
+        }
+      }
+    }`, {name: 'ruby'})
+    .then(d => log(d, ''))
 }
 
-require('batchql@1.1.10').then(app).catch(e => log(e))
+require('batchql@1.1.14').then(app).catch(e => log(e))
 ```
 
 ## This is Dark Magic...
