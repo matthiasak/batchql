@@ -278,9 +278,9 @@ chokidar@^1.6.1:
   optionalDependencies:
     fsevents "^1.0.0"
 
-clan-fp@^1.1.39:
-  version "1.1.39"
-  resolved "https://registry.yarnpkg.com/clan-fp/-/clan-fp-1.1.39.tgz#40083cc158bcbd5ba98025e286f3f3959882e29a"
+clan-fp@^1.1.40:
+  version "1.1.40"
+  resolved "https://registry.yarnpkg.com/clan-fp/-/clan-fp-1.1.40.tgz#25483ba8d7a8d4f4f64394916ca32a33312354f1"
   dependencies:
     etag "^1.8.0"
 
