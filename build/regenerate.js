@@ -60,7 +60,7 @@ var generateSelectionSet = function (set) {
             (items ?
                 generateFields(items) :
                 (generateFilterArgs(filterArgs) +
-                    generateFields(fields instanceof Array ? fields : fields.items)));
+                    generateFields(fields instanceof Array ? fields : (fields && fields.items))));
     })
         .join(' ');
 };

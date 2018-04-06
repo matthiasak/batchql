@@ -16,16 +16,16 @@ const generateValue = (value, type) => {
     if(type === 'variableName') return value
 
     if(type === 'arg')
-        return '{' + 
+        return '{' +
             value.map(v => `${v.name}:${generateValue(v.value, v.valueType)}`).join(', ') +
         '}'
-    
+
     return `"${value}"`
 }
 
 const generateFilterArgs = args => {
     if(!args || args.length === 0) return ''
-    
+
     return '(' +
         args
         .map(({name, value, valueType}) => {
@@ -37,7 +37,7 @@ const generateFilterArgs = args => {
 
 const generateFields = args => {
     if(!args || args.length === 0) return ''
-    
+
     return '{' +
         args
         .map(x => {
@@ -51,30 +51,29 @@ const generateFields = args => {
 
 const generateSelectionSet = set => {
     if(!set || set.length === 0) return '{}'
-    
     return set
         .map(({value, filterArgs, fields, alias, items}) => {
-        	return (alias ? `${alias} : ` : '') + 
-                value + 
+        	return (alias ? `${alias} : ` : '') +
+                value +
                 (
-                    items ? 
+                    items ?
                 	    generateFields(items) :
                 	    (
-                            generateFilterArgs(filterArgs) + 
-                            generateFields(fields instanceof Array ? fields : fields.items)
+                            generateFilterArgs(filterArgs) +
+                            generateFields(fields instanceof Array ? fields : (fields && fields.items))
                         )
                 )
     	})
     	.join(' ')
 }
 
-const generateQuery = ({type, name, opArgList, children}) => 
+const generateQuery = ({type, name, opArgList, children}) =>
     `${type} ${name || ''} ${generateOpArgList(opArgList)} ${generateFields(children)}`
 
 const generateFragment = ({name, target, children:child}) =>
     `fragment ${name} on ${target} ${generateFields(child.items)}`
 
-const regenerate = ast => 
+const regenerate = ast =>
 	ast.reduce((acc,q) => {
         switch(q.type) {
             case "query": return acc + generateQuery(q) + '\n';

@@ -4,14 +4,14 @@
 
 import {obs} from 'clan-fp'
 
-// returns a function that takes a string which parses 
+// returns a function that takes a string which parses
 // the string according to a regexp or pattern, declaring the type of token
 export const token = (t, type=t+'', d=0, o='igm', mod=x=>x) => s => {
-    let r = t instanceof RegExp ? t : new RegExp('^'+t, o), 
+    let r = t instanceof RegExp ? t : new RegExp('^'+t, o),
         results = r.exec(s)
-    
-    if(results === null || results.length <= d) 
-        throw new Error(JSON.stringify({expected: t+'', actual: s}))
+
+    if(results === null || results.length <= d)
+        throw new Error(`expected: ${t}, actual: ${s}`))
 
     return mod({
         remaining: s.slice(results[d].length)
@@ -58,7 +58,7 @@ export const either = (...tokenizers) => s => {
     for(let i = 0, len = tokenizers.length; i<len; i++){
         try {
             return tokenizers[i](s)
-        } catch(e) { 
+        } catch(e) {
             errors.push(e.message)
         }
     }
@@ -89,7 +89,7 @@ export const readN = (n, tokenizer) => s => {
             acc.matched += matched
             count++
         }
-    } catch(e) { 
+    } catch(e) {
         errors.push(e.message)
     }
 

@@ -12,7 +12,7 @@ var __assign = (this && this.__assign) || Object.assign || function(t) {
 };
 exports.__esModule = true;
 var clan_fp_1 = require("clan-fp");
-// returns a function that takes a string which parses 
+// returns a function that takes a string which parses
 // the string according to a regexp or pattern, declaring the type of token
 exports.token = function (t, type, d, o, mod) {
     if (type === void 0) { type = t + ''; }
@@ -22,7 +22,7 @@ exports.token = function (t, type, d, o, mod) {
     return function (s) {
         var r = t instanceof RegExp ? t : new RegExp('^' + t, o), results = r.exec(s);
         if (results === null || results.length <= d)
-            throw new Error(JSON.stringify({ expected: t + '', actual: s }));
+            throw new Error("expected: " + t + ", actual: " + s);
         return mod({
             remaining: s.slice(results[d].length),
             matched: results[d],

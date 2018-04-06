@@ -33,21 +33,21 @@ const opArgListFn =
 
 const opArgList = s => {
     let v = opArgListFn(s)
-    
+
     v.ast = {
         type: 'opArgList',
         value:
             flatten(v.ast)
-            .map(([a,b]) => 
+            .map(([a,b]) =>
                 ({
-                    name: a.value, 
+                    name: a.value,
                     type:
-                        b instanceof Array ? 
-                        b.map(_ => _.value).join('') 
+                        b instanceof Array ?
+                        b.map(_ => _.value).join('')
                         : b.value
                 }))
 	}
-    
+
     return v
 }
 
@@ -102,43 +102,43 @@ const selectionArgsFn =
 const selectionArgs = s => {
     let v = selectionArgsFn(s)
 
-    const prep = ([a,b]) => 
+    const prep = ([a,b]) =>
         ({
-            type: 'arg', 
-            name: a.value, 
-            valueType: b instanceof Array ? 'arg' : b.type, 
+            type: 'arg',
+            name: a.value,
+            valueType: b instanceof Array ? 'arg' : b.type,
             value: b instanceof Array ? b.map(prep) : b.value
         })
-    
+
     v.ast = flatten(v.ast).map(prep)
-    
+
     return v
 }
 
 const fragmentExpansionFn = sequence(ignore(/^\.\.\./), name)
 const fragmentExpansion = s => {
     let v = fragmentExpansionFn(s)
-    
-    v.ast = { 
+
+    v.ast = {
         type: 'fragmentExpansion',
         value: v.ast[1].value
     }
-    
+
     return v
 }
 
 const intoSelection = arr => {
-    if(!(arr instanceof Array)){ 
+    if(!(arr instanceof Array)){
         return arr // not a subquery
     }
-    
+
     let hasAlias = first(arr, x => x.type === 'alias'),
         hasName = first(arr, x => x.type === 'name'),
-        numItems = 
+        numItems =
         	[hasAlias, hasName]
     		.reduce((acc,x) => acc + (x && 1 || 0), 0),
         rest = arr.slice(numItems)
-    
+
     return {
         alias: hasAlias && hasAlias.value,
         type: 'field',
@@ -156,8 +156,10 @@ const selectionSetFn =
             sequence(
                 either(
                     sequence(alias, ignore(':'), name, selectionArgs, s => selectionSet(s)),
+                    sequence(alias, ignore(':'), name, s => selectionSet(s)),
                     sequence(name, selectionArgs, s => selectionSet(s)),
                     sequence(name, s => selectionSet(s)),
+                    sequence(alias, ignore(':'), name),
                     fragmentExpansion,
                     name
                 ),
@@ -169,12 +171,12 @@ const selectionSetFn =
 const selectionSet = s => {
 	let v = selectionSetFn(s),
         parts = flatten(flatten(v.ast))
-    
+
     v.ast = {
         type: 'selectionSet',
         items: parts.map(intoSelection)
     }
-    
+
     return v
 }
 
@@ -182,35 +184,35 @@ const statementFn = sequence(maybe(opType), maybe(name), maybe(opArgList), selec
 
 const statement = s => {
     let v = statementFn(s)
-    
+
     let hasOptype = first(v.ast, (x,i) => x.type === 'opType'),
         hasQueryName = first(v.ast, (x,i) => x.type === 'name'),
         hasOpArgList = first(v.ast, (x,i) => x.type === 'opArgList'),
-        numItems = 
+        numItems =
         	[hasOptype, hasQueryName, hasOpArgList]
     		.reduce((acc,x) => acc + (x && 1 || 0), 0)
-    
+
     v.ast = {
         type: hasOptype && hasOptype.value || 'query',
         name: hasQueryName && hasQueryName.value || 'DEFAULTNAME',
         opArgList: hasOpArgList && hasOpArgList.value,
         children: v.ast.slice(numItems)
     }
-    
+
     return v
 }
 
 const fragmentFn = sequence(token('fragment'), name, ignore('on'), name, selectionSet)
 const fragment = s => {
     let v = fragmentFn(s)
-    
+
     v.ast = {
         type: 'fragmentDefinition',
         name: v.ast[1].value,
         target: v.ast[2].value,
         children: v.ast[3]
     }
-    
+
     return v
 }
 
@@ -219,10 +221,8 @@ const removeComments = s => s.replace(/#[^\n\r]*[\n\r]/igm, '')
 const removeWhitespace = s => s.replace(/\s+/igm, ' ')
 const parseProgram = s => {
     let {remaining, matched, ast} = parseProgramFn(removeWhitespace(removeComments(s)))
-    
-    if(remaining !== '') 
+    if(remaining !== '')
         throw new Error(`remaining, unparsed snippet of graphQL query:\n\n${remaining}`)
-    
     return ast
 }
 

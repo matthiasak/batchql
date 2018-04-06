@@ -83,7 +83,7 @@ var intoSelection = function (arr) {
         fields: rest[rest.length === 2 ? 1 : 0]
     };
 };
-var selectionSetFn = parsers_1.sequence(parsers_1.ignore('\\{'), parsers_1.readN(1, parsers_1.sequence(parsers_1.either(parsers_1.sequence(alias, parsers_1.ignore(':'), name, selectionArgs, function (s) { return selectionSet(s); }), parsers_1.sequence(name, selectionArgs, function (s) { return selectionSet(s); }), parsers_1.sequence(name, function (s) { return selectionSet(s); }), fragmentExpansion, name), parsers_1.maybe(parsers_1.ignore(',')))), parsers_1.ignore('\\}'));
+var selectionSetFn = parsers_1.sequence(parsers_1.ignore('\\{'), parsers_1.readN(1, parsers_1.sequence(parsers_1.either(parsers_1.sequence(alias, parsers_1.ignore(':'), name, selectionArgs, function (s) { return selectionSet(s); }), parsers_1.sequence(alias, parsers_1.ignore(':'), name, function (s) { return selectionSet(s); }), parsers_1.sequence(name, selectionArgs, function (s) { return selectionSet(s); }), parsers_1.sequence(name, function (s) { return selectionSet(s); }), parsers_1.sequence(alias, parsers_1.ignore(':'), name), fragmentExpansion, name), parsers_1.maybe(parsers_1.ignore(',')))), parsers_1.ignore('\\}'));
 var selectionSet = function (s) {
     var v = selectionSetFn(s), parts = utils_1.flatten(utils_1.flatten(v.ast));
     v.ast = {
